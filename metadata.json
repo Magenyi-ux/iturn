@@ -1,0 +1,5 @@
+{
+  "name": "Atelier AI",
+  "description": "A professional tailor's assistant that uses AI to predict body measurements from photos and generate personalized fashion style recommendations.",
+  "requestFramePermissions": []
+}
