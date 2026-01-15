@@ -65,10 +65,41 @@ const App: React.FC = () => {
 
   const [sketchContext, setSketchContext] = useState<{ style: StyleConcept, image: string } | null>(null);
   const [pricingContext, setPricingContext] = useState<StyleConcept | null>(null);
+  const [showKeyPrompt, setShowKeyPrompt] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('atelier_state_v2', JSON.stringify(state));
   }, [state]);
+
+  // Guidelines: Check for API Key selection before using restricted models
+  useEffect(() => {
+    const checkKey = async () => {
+      if (typeof window.aistudio !== 'undefined') {
+        const hasKey = await window.aistudio.hasSelectedApiKey();
+        if (!hasKey) setShowKeyPrompt(true);
+      }
+    };
+    checkKey();
+  }, []);
+
+  const handleOpenKeyDialog = async () => {
+    if (typeof window.aistudio !== 'undefined') {
+      await window.aistudio.openSelectKey();
+      setShowKeyPrompt(false);
+    }
+  };
+
+  const handleNewProfile = () => {
+    setState(prev => ({
+      ...prev,
+      photos: {},
+      measurements: INITIAL_MEASUREMENTS,
+      characteristics: INITIAL_CHARACTERISTICS,
+      styleConcepts: [],
+      view: 'capture',
+      selectedClientId: undefined
+    }));
+  };
 
   const handlePhotosComplete = async (photos: Record<string, string>) => {
     setState(prev => ({ ...prev, photos, view: 'measurements', isPredicting: true }));
@@ -164,6 +195,39 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex bg-stone-50">
+      {/* API Key Selection Overlay as per Guidelines */}
+      {showKeyPrompt && (
+        <div className="fixed inset-0 z-[100] bg-stone-900/90 backdrop-blur-xl flex items-center justify-center p-8">
+           <div className="bg-white max-w-lg w-full rounded-[3rem] p-12 text-center space-y-8 shadow-2xl animate-in zoom-in-95">
+              <div className="w-20 h-20 bg-stone-100 rounded-full flex items-center justify-center mx-auto">
+                 <svg className="w-10 h-10 text-stone-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                 </svg>
+              </div>
+              <div className="space-y-4">
+                 <h2 className="text-3xl font-serif font-bold">Secure Access Required</h2>
+                 <p className="text-stone-500 text-sm leading-relaxed">
+                   To utilize high-fidelity Gemini 3 Pro image generation, you must select an API key from a paid GCP project.
+                 </p>
+                 <a 
+                   href="https://ai.google.dev/gemini-api/docs/billing" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   className="text-[10px] font-black uppercase tracking-widest text-stone-400 border-b border-stone-200 hover:text-stone-900 hover:border-stone-900 transition-all"
+                 >
+                   View Billing Documentation
+                 </a>
+              </div>
+              <button 
+                onClick={handleOpenKeyDialog}
+                className="w-full py-5 bg-stone-900 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-stone-800 transition-all shadow-xl"
+              >
+                Select API Key
+              </button>
+           </div>
+        </div>
+      )}
+
       <aside className="w-20 lg:w-64 bg-stone-900 text-stone-50 flex flex-col h-screen sticky top-0 z-[50]">
         <div className="p-8 flex items-center gap-4">
           <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
@@ -210,7 +274,11 @@ const App: React.FC = () => {
               onBack={() => setState(prev => ({ ...prev, selectedClientId: undefined }))}
             />
           ) : (
-            <ClientVault clients={state.clients} onSelect={(c) => setState(prev => ({ ...prev, selectedClientId: c.id }))} />
+            <ClientVault 
+              clients={state.clients} 
+              onSelect={(c) => setState(prev => ({ ...prev, selectedClientId: c.id }))} 
+              onNewProfile={handleNewProfile}
+            />
           )
         )}
 

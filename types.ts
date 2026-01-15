@@ -54,6 +54,7 @@ export interface PriceItem {
   name: string;
   category: 'Material' | 'Labor' | 'Tool' | 'Addon';
   cost: number;
+  imageUrl?: string;
 }
 
 export interface Order {
@@ -74,6 +75,7 @@ export interface InventoryItem {
   category: 'Material' | 'Tool' | 'Addon';
   unitCost: number;
   stock: number;
+  imageUrl?: string;
 }
 
 export interface SavedInspiration {

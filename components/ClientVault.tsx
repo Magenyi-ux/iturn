@@ -5,9 +5,10 @@ import { Client } from '../types';
 interface ClientVaultProps {
   clients: Client[];
   onSelect: (client: Client) => void;
+  onNewProfile: () => void;
 }
 
-const ClientVault: React.FC<ClientVaultProps> = ({ clients, onSelect }) => {
+const ClientVault: React.FC<ClientVaultProps> = ({ clients, onSelect, onNewProfile }) => {
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
       <div className="flex justify-between items-end">
@@ -15,7 +16,10 @@ const ClientVault: React.FC<ClientVaultProps> = ({ clients, onSelect }) => {
           <h2 className="text-4xl font-serif font-bold text-stone-900">Client Vault</h2>
           <p className="text-stone-500 mt-2">Historical profiles and measurement logs.</p>
         </div>
-        <button className="px-6 py-2 bg-stone-900 text-white rounded-full text-xs font-bold uppercase tracking-widest hover:bg-stone-800 transition-all">
+        <button 
+          onClick={onNewProfile}
+          className="px-6 py-2 bg-stone-900 text-white rounded-full text-xs font-bold uppercase tracking-widest hover:bg-stone-800 transition-all"
+        >
           New Profile
         </button>
       </div>
