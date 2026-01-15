@@ -15,7 +15,7 @@ export class MySubClassedDexie extends Dexie {
 
   constructor() {
     super('atelierDB');
-    this.version(1).stores({
+    this.version(2).stores({
       clients: 'id, name',
       photos: 'clientId'
     });

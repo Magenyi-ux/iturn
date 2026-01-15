@@ -73,12 +73,16 @@ const App: React.FC = () => {
   useEffect(() => {
     const loadPhotos = async () => {
       if (state.selectedClientId) {
-        const clientPhotos = await db.photos.get(state.selectedClientId);
-        if (clientPhotos) {
-          const { clientId, ...photos } = clientPhotos;
-          setState(prev => ({ ...prev, photos }));
-        } else {
-          setState(prev => ({ ...prev, photos: {} }));
+        try {
+          const clientPhotos = await db.photos.get(state.selectedClientId);
+          if (clientPhotos) {
+            const { clientId, ...photos } = clientPhotos;
+            setState(prev => ({ ...prev, photos }));
+          } else {
+            setState(prev => ({ ...prev, photos: {} }));
+          }
+        } catch (error) {
+          console.error("Failed to load photos from the database", error);
         }
       }
     };
