@@ -30,9 +30,9 @@ const App: React.FC = () => {
   const clients = useLiveQuery(() => db.clients.toArray());
 
   const [state, setState] = useState<Omit<AppState, 'clients'>>(() => {
-    const saved = localStorage.getItem('atelier_state_v2');
-    if (saved) {
-      try {
+    try {
+      const saved = localStorage.getItem('atelier_state_v2');
+      if (saved) {
         const parsed = JSON.parse(saved);
         return {
           ...parsed,
@@ -40,9 +40,9 @@ const App: React.FC = () => {
           isGeneratingStyles: false,
           inventory: parsed.inventory || INITIAL_INVENTORY,
         };
-      } catch (e) {
-        console.error("Failed to load saved state", e);
       }
+    } catch (e) {
+      console.error("Failed to load saved state", e);
     }
     return {
       photos: {},
