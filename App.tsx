@@ -64,11 +64,27 @@ const App: React.FC = () => {
   const [sketchContext, setSketchContext] = useState<{ style: StyleConcept, image: string } | null>(null);
   const [pricingContext, setPricingContext] = useState<StyleConcept | null>(null);
   const [showKeyPrompt, setShowKeyPrompt] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    return (localStorage.getItem('theme') as 'light' | 'dark') || 'light';
+  });
 
   useEffect(() => {
     const { photos, ...stateToSave } = state;
     localStorage.setItem('atelier_state_v2', JSON.stringify(stateToSave));
   }, [state]);
+
+  useEffect(() => {
+    localStorage.setItem('theme', theme);
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
 
   useEffect(() => {
     const loadPhotos = async () => {
@@ -230,7 +246,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex bg-stone-50">
+    <div className="min-h-screen flex bg-stone-50 dark:bg-stone-900">
       {/* API Key Selection Overlay as per Guidelines */}
       {showKeyPrompt && (
         <div className="fixed inset-0 z-[100] bg-stone-900/90 backdrop-blur-xl flex items-center justify-center p-8">
@@ -269,10 +285,25 @@ const App: React.FC = () => {
           <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
             <span className="text-stone-900 font-serif font-bold text-xl">A</span>
           </div>
-          <div className="hidden lg:block">
+          <div className="hidden lg:block flex-1">
             <h1 className="text-lg font-serif font-bold">Atelier AI</h1>
             <p className="text-[10px] uppercase tracking-widest text-stone-500 font-bold">Digital Tailoring</p>
           </div>
+          <button
+            onClick={toggleTheme}
+            className="w-10 h-10 bg-stone-800 hover:bg-stone-700 rounded-xl flex items-center justify-center transition-all"
+            title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+          >
+            {theme === 'light' ? (
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            )}
+          </button>
         </div>
 
         <nav className="flex-1 px-4 py-8 space-y-2">
