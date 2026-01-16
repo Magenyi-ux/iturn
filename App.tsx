@@ -2,7 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from './services/db';
-import { AppState, INITIAL_MEASUREMENTS, INITIAL_CHARACTERISTICS, Client, Fabric, Order, StyleConcept, SavedInspiration, InventoryItem, PriceItem } from './types';
+import { Client, Fabric, StyleConcept, SavedInspiration, InventoryItem, PriceItem } from './types';
+import { useAuth } from './components/AuthContext';
+import Login from './components/Login';
 import PhotoUpload from './components/PhotoUpload';
 import MeasurementForm from './components/MeasurementForm';
 import StyleCatalog from './components/StyleCatalog';
@@ -19,6 +21,17 @@ import AdminDashboard from './components/AdminDashboard';
 import PricingModal from './components/PricingModal';
 import { predictMeasurements, generateStyles } from './services/gemini';
 
+const INITIAL_MEASUREMENTS = {
+  chest: 0,
+  waist: 0,
+  hips: 0,
+  shoulder: 0,
+  sleeves: 0,
+  length: 0,
+};
+
+const INITIAL_CHARACTERISTICS = {};
+
 const INITIAL_INVENTORY: InventoryItem[] = [
   { id: 'i1', name: 'Premium Egyptian Cotton', category: 'Material', unitCost: 45, stock: 120 },
   { id: 'i2', name: 'Raw Mulberry Silk', category: 'Material', unitCost: 150, stock: 45 },
@@ -27,9 +40,22 @@ const INITIAL_INVENTORY: InventoryItem[] = [
 ];
 
 const App: React.FC = () => {
+  const { user, loading } = useAuth();
   const clients = useLiveQuery(() => db.clients.toArray());
 
-  const [state, setState] = useState<Omit<AppState, 'clients'>>(() => {
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-stone-50 dark:bg-stone-900">
+        <div className="w-16 h-16 border-4 border-stone-100 border-t-stone-900 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Login />;
+  }
+
+  const [state, setState] = useState(() => {
     const saved = localStorage.getItem('atelier_state_v2');
     if (saved) {
       try {
@@ -328,6 +354,15 @@ const App: React.FC = () => {
               <span className="hidden lg:block text-xs font-bold uppercase tracking-widest">{item.label}</span>
             </button>
           ))}
+          <button
+            onClick={() => useAuth().logout()}
+            className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl transition-all text-stone-400 hover:text-white"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span className="hidden lg:block text-xs font-bold uppercase tracking-widest">Logout</span>
+          </button>
         </nav>
       </aside>
 
