@@ -23,10 +23,10 @@ const MOCK_CLIENTS: Client[] = [
 ];
 
 const INITIAL_INVENTORY: InventoryItem[] = [
-  { id: 'i1', name: 'Premium Egyptian Cotton', category: 'Material', unitCost: 45, stock: 120 },
-  { id: 'i2', name: 'Raw Mulberry Silk', category: 'Material', unitCost: 150, stock: 45 },
-  { id: 'i3', name: 'Silver Zipper (YKK)', category: 'Tool', unitCost: 12, stock: 300 },
-  { id: 'i4', name: 'Hand-Carved Bone Buttons', category: 'Addon', unitCost: 8, stock: 500 }
+  { id: 'i1', name: 'Premium Egyptian Cotton', category: 'Material', unitCost: 45, stock: 120, imageUrl: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=400' },
+  { id: 'i2', name: 'Raw Mulberry Silk', category: 'Material', unitCost: 150, stock: 45, imageUrl: 'https://images.unsplash.com/photo-1618342205515-5626210f9191?auto=format&fit=crop&q=80&w=400' },
+  { id: 'i3', name: 'Silver Zipper (YKK)', category: 'Tool', unitCost: 12, stock: 300, imageUrl: 'https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&q=80&w=400' },
+  { id: 'i4', name: 'Hand-Carved Bone Buttons', category: 'Addon', unitCost: 8, stock: 500, imageUrl: 'https://images.unsplash.com/photo-1589363412213-36367332f146?auto=format&fit=crop&q=80&w=400' }
 ];
 
 const App: React.FC = () => {
@@ -71,7 +71,6 @@ const App: React.FC = () => {
     localStorage.setItem('atelier_state_v2', JSON.stringify(state));
   }, [state]);
 
-  // Guidelines: Check for API Key selection before using restricted models
   useEffect(() => {
     const checkKey = async () => {
       if (typeof window.aistudio !== 'undefined') {
@@ -97,7 +96,8 @@ const App: React.FC = () => {
       characteristics: INITIAL_CHARACTERISTICS,
       styleConcepts: [],
       view: 'capture',
-      selectedClientId: undefined
+      selectedClientId: undefined,
+      userSuggestion: ''
     }));
   };
 
@@ -195,7 +195,6 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex bg-stone-50">
-      {/* API Key Selection Overlay as per Guidelines */}
       {showKeyPrompt && (
         <div className="fixed inset-0 z-[100] bg-stone-900/90 backdrop-blur-xl flex items-center justify-center p-8">
            <div className="bg-white max-w-lg w-full rounded-[3rem] p-12 text-center space-y-8 shadow-2xl animate-in zoom-in-95">

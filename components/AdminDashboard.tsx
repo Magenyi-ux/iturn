@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { InventoryItem } from '../types';
 
 interface AdminDashboardProps {
@@ -10,6 +10,7 @@ interface AdminDashboardProps {
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ inventory, onUpdateInventory, onDeleteItem }) => {
   const [isAdding, setIsAdding] = useState(false);
+  const [isCapturing, setIsCapturing] = useState(false);
   const [newItem, setNewItem] = useState<Partial<InventoryItem>>({
     category: 'Material',
     name: '',
@@ -17,6 +18,44 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ inventory, onUpdateInve
     stock: 0,
     imageUrl: ''
   });
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const startCamera = async () => {
+    setIsCapturing(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (err) {
+      console.error("Camera error:", err);
+      setIsCapturing(false);
+    }
+  };
+
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const context = canvasRef.current.getContext('2d');
+      if (context) {
+        canvasRef.current.width = videoRef.current.videoWidth;
+        canvasRef.current.height = videoRef.current.videoHeight;
+        context.drawImage(videoRef.current, 0, 0);
+        const dataUrl = canvasRef.current.toDataURL('image/jpeg');
+        setNewItem(prev => ({ ...prev, imageUrl: dataUrl }));
+        stopCamera();
+      }
+    }
+  };
+
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    setIsCapturing(false);
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -61,22 +100,52 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ inventory, onUpdateInve
             <h3 className="text-2xl font-serif font-bold">New Inventory Entry</h3>
             
             <div className="space-y-6">
-              <div className="flex justify-center">
-                <label className="relative group cursor-pointer w-32 h-32">
-                  <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
-                  <div className="w-full h-full rounded-3xl border-2 border-dashed border-stone-200 flex items-center justify-center bg-stone-50 overflow-hidden group-hover:border-stone-900 transition-all">
-                    {newItem.imageUrl ? (
-                      <img src={newItem.imageUrl} className="w-full h-full object-cover" alt="Preview" />
-                    ) : (
-                      <div className="text-center">
-                        <svg className="w-6 h-6 mx-auto text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span className="text-[8px] font-black uppercase tracking-widest text-stone-400 mt-2 block">Upload Photo</span>
-                      </div>
-                    )}
+              <div className="flex flex-col items-center gap-4">
+                {isCapturing ? (
+                  <div className="relative w-full aspect-square rounded-3xl overflow-hidden bg-black border-2 border-stone-900">
+                    <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
+                    <button 
+                      onClick={capturePhoto}
+                      className="absolute bottom-6 left-1/2 -translate-x-1/2 w-16 h-16 bg-white rounded-full border-4 border-stone-200 shadow-2xl flex items-center justify-center"
+                    >
+                      <div className="w-12 h-12 bg-stone-900 rounded-full" />
+                    </button>
+                    <button 
+                      onClick={stopCamera}
+                      className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-full"
+                    >
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
                   </div>
-                </label>
+                ) : (
+                  <div className="flex gap-4 w-full">
+                    <label className="flex-1 relative group cursor-pointer aspect-square">
+                      <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                      <div className="w-full h-full rounded-3xl border-2 border-dashed border-stone-200 flex items-center justify-center bg-stone-50 overflow-hidden group-hover:border-stone-900 transition-all">
+                        {newItem.imageUrl ? (
+                          <img src={newItem.imageUrl} className="w-full h-full object-cover" alt="Preview" />
+                        ) : (
+                          <div className="text-center">
+                            <svg className="w-6 h-6 mx-auto text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span className="text-[8px] font-black uppercase tracking-widest text-stone-400 mt-2 block">Upload File</span>
+                          </div>
+                        )}
+                      </div>
+                    </label>
+                    <button 
+                      onClick={startCamera}
+                      className="flex-1 rounded-3xl border-2 border-dashed border-stone-200 bg-stone-50 hover:border-stone-900 flex flex-col items-center justify-center transition-all group"
+                    >
+                       <svg className="w-6 h-6 text-stone-300 group-hover:text-stone-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                       </svg>
+                       <span className="text-[8px] font-black uppercase tracking-widest text-stone-400 mt-2 group-hover:text-stone-900">Take Photo</span>
+                    </button>
+                  </div>
+                )}
+                <canvas ref={canvasRef} className="hidden" />
               </div>
 
               <div className="space-y-2">
@@ -171,7 +240,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ inventory, onUpdateInve
                         className="p-2 text-stone-200 hover:text-red-500 transition-all"
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>
                       </button>
                    </div>

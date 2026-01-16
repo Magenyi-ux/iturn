@@ -51,6 +51,7 @@ const StyleCatalog: React.FC<StyleCatalogProps> = ({ concepts, measurements, cha
       setLoading(prev => ({ ...prev, [concept.id]: `Crafting ${angle} view...` }));
       
       try {
+        // Ensuring user's front photo is always passed as the primary visual reference
         const url = await generateStyleImage(
           concept, 
           measurements, 
@@ -65,7 +66,6 @@ const StyleCatalog: React.FC<StyleCatalogProps> = ({ concepts, measurements, cha
         if (url) {
           if (angle === 'front') {
             frontViewImage = url;
-            // HIDDEN PHASE: Synthesize the secret DNA blueprint
             setLoading(prev => ({ ...prev, [concept.id]: `Stabilizing Design DNA...` }));
             secretDesignDNA = await generateDesignDNA(url, concept);
           }
@@ -82,7 +82,6 @@ const StyleCatalog: React.FC<StyleCatalogProps> = ({ concepts, measurements, cha
           }));
         }
         
-        // Brief pause to prevent API rate limits and allow context injection
         if (i < total - 1) {
           await new Promise(r => setTimeout(r, 1500));
         }
@@ -90,7 +89,7 @@ const StyleCatalog: React.FC<StyleCatalogProps> = ({ concepts, measurements, cha
         console.error("Failed to generate angle", angle, e);
         setLoading(prev => ({ ...prev, [concept.id]: `Stabilizing design...` }));
         await new Promise(r => setTimeout(r, 3000));
-        i--; // Retry
+        i--;
       }
     }
     setLoading(prev => ({ ...prev, [concept.id]: null }));
