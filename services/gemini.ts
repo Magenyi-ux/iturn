@@ -66,12 +66,19 @@ export const generateDesignDNA = async (frontViewImage: string, style: StyleConc
   });
 };
 
+const sanitizeForPrompt = (text: string) => {
+  // Simple sanitization: remove characters that could be used for prompt injection.
+  // This is a basic example; a more robust solution might use a library or a more comprehensive regex.
+  return text.replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
+};
+
 export const searchInspiration = async (query: string): Promise<{ text: string, links: { title: string, uri: string }[] }> => {
   return withRetry(async () => {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const sanitizedQuery = sanitizeForPrompt(query);
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `Search for high-end fashion design, textile patterns, couture silhouettes, and bespoke tailoring elements related to: "${query}". Provide a deep aesthetic synthesis of the trend.`,
+      contents: `Search for high-end fashion design, textile patterns, couture silhouettes, and bespoke tailoring elements related to: "${sanitizedQuery}". Provide a deep aesthetic synthesis of the trend.`,
       config: {
         tools: [{ googleSearch: {} }]
       }
