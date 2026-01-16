@@ -1,7 +1,5 @@
 
 import React, { useState, useEffect } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from './services/db';
 import { AppState, INITIAL_MEASUREMENTS, INITIAL_CHARACTERISTICS, Client, Fabric, Order, StyleConcept, SavedInspiration, InventoryItem, PriceItem } from './types';
 import PhotoUpload from './components/PhotoUpload';
 import MeasurementForm from './components/MeasurementForm';
@@ -19,6 +17,11 @@ import AdminDashboard from './components/AdminDashboard';
 import PricingModal from './components/PricingModal';
 import { predictMeasurements, generateStyles } from './services/gemini';
 
+const MOCK_CLIENTS: Client[] = [
+  { id: '1', name: 'Sebastian Vane', email: 'vane@example.com', phone: '+123', measurements: INITIAL_MEASUREMENTS, history: [], lastVisit: '2 days ago' },
+  { id: '2', name: 'Elena Thorne', email: 'thorne@example.com', phone: '+456', measurements: INITIAL_MEASUREMENTS, history: [], lastVisit: 'Just now' }
+];
+
 const INITIAL_INVENTORY: InventoryItem[] = [
   { id: 'i1', name: 'Premium Egyptian Cotton', category: 'Material', unitCost: 45, stock: 120 },
   { id: 'i2', name: 'Raw Mulberry Silk', category: 'Material', unitCost: 150, stock: 45 },
@@ -27,18 +30,16 @@ const INITIAL_INVENTORY: InventoryItem[] = [
 ];
 
 const App: React.FC = () => {
-  const clients = useLiveQuery(() => db.clients.toArray());
-
-  const [state, setState] = useState<Omit<AppState, 'clients'>>(() => {
+  const [state, setState] = useState<AppState>(() => {
     const saved = localStorage.getItem('atelier_state_v2');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        return {
-          ...parsed,
-          isPredicting: false,
+        return { 
+          ...parsed, 
+          isPredicting: false, 
           isGeneratingStyles: false,
-          inventory: parsed.inventory || INITIAL_INVENTORY,
+          inventory: parsed.inventory || INITIAL_INVENTORY
         };
       } catch (e) {
         console.error("Failed to load saved state", e);
@@ -54,10 +55,11 @@ const App: React.FC = () => {
       selectedStyles: [],
       userSuggestion: '',
       view: 'vault',
+      clients: MOCK_CLIENTS,
       fabrics: [],
       orders: [],
       inventory: INITIAL_INVENTORY,
-      savedInspirations: [],
+      savedInspirations: []
     };
   });
 
@@ -66,24 +68,8 @@ const App: React.FC = () => {
   const [showKeyPrompt, setShowKeyPrompt] = useState(false);
 
   useEffect(() => {
-    const { photos, ...stateToSave } = state;
-    localStorage.setItem('atelier_state_v2', JSON.stringify(stateToSave));
+    localStorage.setItem('atelier_state_v2', JSON.stringify(state));
   }, [state]);
-
-  useEffect(() => {
-    const loadPhotos = async () => {
-      if (state.selectedClientId) {
-        const clientPhotos = await db.photos.get(state.selectedClientId);
-        if (clientPhotos) {
-          const { clientId, ...photos } = clientPhotos;
-          setState(prev => ({ ...prev, photos }));
-        } else {
-          setState(prev => ({ ...prev, photos: {} }));
-        }
-      }
-    };
-    loadPhotos();
-  }, [state.selectedClientId]);
 
   // Guidelines: Check for API Key selection before using restricted models
   useEffect(() => {
@@ -103,17 +89,7 @@ const App: React.FC = () => {
     }
   };
 
-  const handleNewProfile = async () => {
-    const newClient: Client = {
-      id: crypto.randomUUID(),
-      name: 'New Client',
-      email: '',
-      phone: '',
-      measurements: INITIAL_MEASUREMENTS,
-      history: [],
-      lastVisit: new Date().toISOString(),
-    };
-    await db.clients.add(newClient);
+  const handleNewProfile = () => {
     setState(prev => ({
       ...prev,
       photos: {},
@@ -121,20 +97,11 @@ const App: React.FC = () => {
       characteristics: INITIAL_CHARACTERISTICS,
       styleConcepts: [],
       view: 'capture',
-      selectedClientId: newClient.id,
+      selectedClientId: undefined
     }));
   };
 
   const handlePhotosComplete = async (photos: Record<string, string>) => {
-    if (!state.selectedClientId) return;
-
-    await db.photos.put({
-      clientId: state.selectedClientId,
-      front: photos.front,
-      side: photos.side,
-      back: photos.back,
-    });
-
     setState(prev => ({ ...prev, photos, view: 'measurements', isPredicting: true }));
     try {
       const result = await predictMeasurements(photos);
@@ -171,14 +138,11 @@ const App: React.FC = () => {
   };
 
   const finalizeCreateOrder = (breakdown: PriceItem[], totalPrice: number) => {
-    if (!pricingContext || !clients) return;
+    if (!pricingContext) return;
     const style = pricingContext;
-    const targetClientId = state.selectedClientId || clients[0]?.id;
-    if (!targetClientId) return;
-
     const newOrder: Order = {
-      id: crypto.randomUUID(),
-      clientId: targetClientId,
+      id: Math.random().toString(36).substr(2, 9),
+      clientId: state.selectedClientId || state.clients[0].id,
       styleId: style.id,
       fabricId: state.fabrics[0]?.id || 'default',
       status: 'Design',
@@ -302,17 +266,17 @@ const App: React.FC = () => {
 
       <main className="flex-1 p-12 overflow-y-auto">
         {state.view === 'vault' && (
-          state.selectedClientId && clients ? (
-            <StyleTimeline
-              client={clients.find(c => c.id === state.selectedClientId)!}
-              orders={state.orders}
-              concepts={state.styleConcepts}
+          state.selectedClientId ? (
+            <StyleTimeline 
+              client={state.clients.find(c => c.id === state.selectedClientId)!} 
+              orders={state.orders} 
+              concepts={state.styleConcepts} 
               onBack={() => setState(prev => ({ ...prev, selectedClientId: undefined }))}
             />
           ) : (
-            <ClientVault
-              clients={clients || []}
-              onSelect={(c) => setState(prev => ({ ...prev, selectedClientId: c.id }))}
+            <ClientVault 
+              clients={state.clients} 
+              onSelect={(c) => setState(prev => ({ ...prev, selectedClientId: c.id }))} 
               onNewProfile={handleNewProfile}
             />
           )
@@ -348,9 +312,9 @@ const App: React.FC = () => {
         )}
 
         {state.view === 'workroom' && (
-          <Workroom
-            orders={state.orders}
-            clients={clients || []}
+          <Workroom 
+            orders={state.orders} 
+            clients={state.clients} 
             concepts={state.styleConcepts}
             onUpdateStatus={updateOrderStatus}
             onOpenBlueprint={openBlueprint}
