@@ -16,6 +16,10 @@ import SavedStudio from './components/SavedStudio';
 import AdminDashboard from './components/AdminDashboard';
 import PricingModal from './components/PricingModal';
 import { predictMeasurements, generateStyles } from './services/gemini';
+import { auth } from './services/firebase';
+import { onAuthStateChanged, User, signOut } from 'firebase/auth';
+import Auth from './components/Auth';
+import { loadUserState, saveUserState } from './services/db';
 
 const MOCK_CLIENTS: Client[] = [
   { id: '1', name: 'Sebastian Vane', email: 'vane@example.com', phone: '+123', measurements: INITIAL_MEASUREMENTS, history: [], lastVisit: '2 days ago' },
@@ -30,37 +34,23 @@ const INITIAL_INVENTORY: InventoryItem[] = [
 ];
 
 const App: React.FC = () => {
-  const [state, setState] = useState<AppState>(() => {
-    const saved = localStorage.getItem('atelier_state_v2');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        return { 
-          ...parsed, 
-          isPredicting: false, 
-          isGeneratingStyles: false,
-          inventory: parsed.inventory || INITIAL_INVENTORY
-        };
-      } catch (e) {
-        console.error("Failed to load saved state", e);
-      }
-    }
-    return {
-      photos: {},
-      measurements: INITIAL_MEASUREMENTS,
-      characteristics: INITIAL_CHARACTERISTICS,
-      isPredicting: false,
-      isGeneratingStyles: false,
-      styleConcepts: [],
-      selectedStyles: [],
-      userSuggestion: '',
-      view: 'vault',
-      clients: MOCK_CLIENTS,
-      fabrics: [],
-      orders: [],
-      inventory: INITIAL_INVENTORY,
-      savedInspirations: []
-    };
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [state, setState] = useState<AppState>({
+    photos: {},
+    measurements: INITIAL_MEASUREMENTS,
+    characteristics: INITIAL_CHARACTERISTICS,
+    isPredicting: false,
+    isGeneratingStyles: false,
+    styleConcepts: [],
+    selectedStyles: [],
+    userSuggestion: '',
+    view: 'vault',
+    clients: MOCK_CLIENTS,
+    fabrics: [],
+    orders: [],
+    inventory: INITIAL_INVENTORY,
+    savedInspirations: []
   });
 
   const [sketchContext, setSketchContext] = useState<{ style: StyleConcept, image: string } | null>(null);
@@ -68,8 +58,44 @@ const App: React.FC = () => {
   const [showKeyPrompt, setShowKeyPrompt] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem('atelier_state_v2', JSON.stringify(state));
-  }, [state]);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        const cloudState = await loadUserState(currentUser.uid);
+        if (cloudState) {
+          setState(cloudState);
+        } else {
+          // Migration logic: if no cloud state but there is local state, migrate it
+          const localSaved = localStorage.getItem('atelier_state_v2');
+          if (localSaved) {
+            try {
+              const parsed = JSON.parse(localSaved);
+              const migratedState = {
+                ...parsed,
+                isPredicting: false,
+                isGeneratingStyles: false,
+                inventory: parsed.inventory || INITIAL_INVENTORY
+              };
+              setState(migratedState);
+              await saveUserState(currentUser.uid, migratedState);
+              // We can keep localStorage as a backup or clear it,
+              // but for safety let's just leave it for now.
+            } catch (e) {
+              console.error("Failed to migrate local state", e);
+            }
+          }
+        }
+      }
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (user && !loading) {
+      saveUserState(user.uid, state);
+    }
+  }, [state, user, loading]);
 
   useEffect(() => {
     const checkKey = async () => {
@@ -193,6 +219,18 @@ const App: React.FC = () => {
     }));
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-stone-50 flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-stone-100 border-t-stone-900 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Auth />;
+  }
+
   return (
     <div className="min-h-screen flex bg-stone-50">
       {showKeyPrompt && (
@@ -261,6 +299,18 @@ const App: React.FC = () => {
             </button>
           ))}
         </nav>
+
+        <div className="p-4 border-t border-stone-800">
+          <button
+            onClick={() => signOut(auth)}
+            className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl transition-all text-stone-400 hover:text-white hover:bg-stone-800"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span className="hidden lg:block text-xs font-bold uppercase tracking-widest">Sign Out</span>
+          </button>
+        </div>
       </aside>
 
       <main className="flex-1 p-12 overflow-y-auto">
