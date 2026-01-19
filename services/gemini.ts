@@ -2,6 +2,17 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Measurements, StyleConcept, PhysicalCharacteristics, ViewAngle, DisplayMode, Fabric } from "../types";
 
+async function getApiKey(): Promise<string> {
+  if (typeof window.aistudio === 'undefined') {
+    throw new Error("aistudio context is not available.");
+  }
+  const key = await window.aistudio.getApiKey();
+  if (!key) {
+    throw new Error("API key is not available.");
+  }
+  return key;
+}
+
 async function withRetry<T>(fn: () => Promise<T>, maxRetries: number = 3, initialDelay: number = 3000): Promise<T> {
   let lastError: any;
   for (let i = 0; i < maxRetries; i++) {
@@ -41,7 +52,8 @@ const extractBase64 = (url: string) => url.split(',')[1];
 
 export const generateDesignDNA = async (frontViewImage: string, style: StyleConcept): Promise<string> => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = await getApiKey();
+    const ai = new GoogleGenAI({ apiKey });
     const img = await standardizeImage(frontViewImage, 768);
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
@@ -68,7 +80,8 @@ export const generateDesignDNA = async (frontViewImage: string, style: StyleConc
 
 export const searchInspiration = async (query: string): Promise<{ text: string, links: { title: string, uri: string }[] }> => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = await getApiKey();
+    const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: `Search for high-end fashion design, textile patterns, couture silhouettes, and bespoke tailoring elements related to: "${query}". Provide a deep aesthetic synthesis of the trend.`,
@@ -85,7 +98,8 @@ export const searchInspiration = async (query: string): Promise<{ text: string, 
 
 export const generateMoodImages = async (description: string): Promise<string[]> => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = await getApiKey();
+    const ai = new GoogleGenAI({ apiKey });
     const aspects: ("1:1" | "3:4" | "4:3")[] = ["3:4", "1:1", "4:3", "3:4"];
     const results: string[] = [];
     for (const aspect of aspects) {
@@ -103,7 +117,8 @@ export const generateMoodImages = async (description: string): Promise<string[]>
 
 export const refineDesign = async (baseImage: string, sketchOverlay: string, instructions: string): Promise<string | null> => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = await getApiKey();
+    const ai = new GoogleGenAI({ apiKey });
     const base = await standardizeImage(baseImage, 512);
     const sketch = await standardizeImage(sketchOverlay, 512);
     const response = await ai.models.generateContent({
@@ -124,7 +139,8 @@ export const refineDesign = async (baseImage: string, sketchOverlay: string, ins
 
 export const generatePattern = async (style: StyleConcept, measurements: Measurements): Promise<string> => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = await getApiKey();
+    const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: `Create a detailed technical pattern description for "${style.title}". Provide specific cutting coordinates, seam allowances, and assembly order based on these measurements: ${JSON.stringify(measurements)}. Return a professional garment drafting guide.`
@@ -135,7 +151,8 @@ export const generatePattern = async (style: StyleConcept, measurements: Measure
 
 export const analyzeFabric = async (imageUrl: string): Promise<string> => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = await getApiKey();
+    const ai = new GoogleGenAI({ apiKey });
     const img = await standardizeImage(imageUrl, 512);
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
@@ -152,7 +169,8 @@ export const analyzeFabric = async (imageUrl: string): Promise<string> => {
 
 export const predictMeasurements = async (photos: Record<string, string>) => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = await getApiKey();
+    const ai = new GoogleGenAI({ apiKey });
     const p = {
       front: await standardizeImage(photos.front),
       side: await standardizeImage(photos.side),
@@ -197,7 +215,8 @@ export const predictMeasurements = async (photos: Record<string, string>) => {
 
 export const generateStyles = async (measurements: Measurements, photos: Record<string, string>, suggestion: string = "") => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = await getApiKey();
+    const ai = new GoogleGenAI({ apiKey });
     const img = await standardizeImage(photos.front, 512);
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
@@ -237,7 +256,8 @@ export const generateStyleImage = async (
   designDNA?: string 
 ) => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = await getApiKey();
+    const ai = new GoogleGenAI({ apiKey });
     const personRef = await standardizeImage(userPhotoRef, 768);
     
     const parts: any[] = [
