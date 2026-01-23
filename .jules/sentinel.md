@@ -1,0 +1,4 @@
+## 2024-05-20 - Insecure API Key Exposure in Vite Config
+**Vulnerability:** The `GEMINI_API_KEY` was being loaded from environment variables and directly injected into the client-side application bundle via the `define` property in `vite.config.ts`.
+**Learning:** This is a critical security risk, as it exposes the API key to anyone who inspects the built JavaScript files. The key should never be exposed to the client-side.
+**Prevention:** Sensitive keys should be handled by a secure backend that proxies requests to the API. In the absence of a backend, the application should rely on the user to provide their own key at runtime, which is the approach taken in this fix.
