@@ -52,6 +52,10 @@ const Auth: React.FC = () => {
     }
   };
 
+  const handleGuestEntry = () => {
+    window.dispatchEvent(new CustomEvent('auth:guest'));
+  };
+
   return (
     <div className="min-h-screen bg-stone-50 flex items-center justify-center p-6">
       <div className="max-w-md w-full bg-white rounded-[2.5rem] shadow-2xl p-10 space-y-8 animate-in fade-in zoom-in duration-500">
@@ -139,6 +143,14 @@ const Auth: React.FC = () => {
               />
             </svg>
             Continue with Google
+          </button>
+
+          <button
+            onClick={handleGuestEntry}
+            disabled={loading}
+            className="w-full py-4 bg-stone-100 text-stone-600 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-stone-200 transition-all shadow-sm"
+          >
+            Enter as Guest
           </button>
 
           <div className="text-center">

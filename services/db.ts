@@ -1,10 +1,21 @@
 import { AppState } from "../types";
-import { supabase } from "./supabase";
+import { supabase, isSupabaseConfigured } from "./supabase";
+
+const LOCAL_STORAGE_KEY = 'atelier_ai_user_state';
 
 export const saveUserState = async (state: AppState) => {
   try {
+    if (!isSupabaseConfigured) {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state));
+      return;
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) {
+      // If no user but supabase is configured, we might still want a local fallback for guest sessions
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state));
+      return;
+    }
 
     const { error } = await supabase
       .from('user_state')
@@ -18,8 +29,16 @@ export const saveUserState = async (state: AppState) => {
 
 export const loadUserState = async (): Promise<AppState | null> => {
   try {
+    if (!isSupabaseConfigured) {
+      const localData = localStorage.getItem(LOCAL_STORAGE_KEY);
+      return localData ? JSON.parse(localData) : null;
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
+    if (!user) {
+      const localData = localStorage.getItem(LOCAL_STORAGE_KEY);
+      return localData ? JSON.parse(localData) : null;
+    }
 
     const { data, error } = await supabase
       .from('user_state')
@@ -32,7 +51,7 @@ export const loadUserState = async (): Promise<AppState | null> => {
        return null;
     }
 
-    return data?.state as AppState || null;
+    return (data?.state as AppState) || null;
   } catch (error) {
     console.error("Error loading user state:", error);
     return null;

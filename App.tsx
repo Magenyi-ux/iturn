@@ -18,7 +18,7 @@ import PricingModal from './components/PricingModal';
 import { predictMeasurements, generateStyles } from './services/gemini';
 import Auth from './components/Auth';
 import { loadUserState, saveUserState } from './services/db';
-import { supabase } from './services/supabase';
+import { supabase, isSupabaseConfigured } from './services/supabase';
 
 const MOCK_CLIENTS: Client[] = [
   { id: '1', name: 'Sebastian Vane', email: 'vane@example.com', phone: '+123', measurements: INITIAL_MEASUREMENTS, history: [], lastVisit: '2 days ago' },
@@ -58,6 +58,13 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const initAuth = async () => {
+      if (!isSupabaseConfigured) {
+        const cloudState = await loadUserState();
+        if (cloudState) setState(cloudState);
+        setLoading(false);
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         setUser({ id: session.user.id, email: session.user.email! });
@@ -78,7 +85,18 @@ const App: React.FC = () => {
       }
     });
 
-    return () => subscription.unsubscribe();
+    const handleGuest = async () => {
+      setUser({ id: 'guest', email: 'guest@atelier.ai' });
+      const cloudState = await loadUserState();
+      if (cloudState) setState(cloudState);
+    };
+
+    window.addEventListener('auth:guest' as any, handleGuest);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('auth:guest' as any, handleGuest);
+    };
   }, []);
 
   useEffect(() => {
