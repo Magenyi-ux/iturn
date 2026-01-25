@@ -16,8 +16,6 @@ import SavedStudio from './components/SavedStudio';
 import AdminDashboard from './components/AdminDashboard';
 import PricingModal from './components/PricingModal';
 import { predictMeasurements, generateStyles } from './services/gemini';
-import { auth } from './services/firebase';
-import { onAuthStateChanged, User, signOut } from 'firebase/auth';
 import Auth from './components/Auth';
 import { loadUserState, saveUserState } from './services/db';
 
@@ -34,7 +32,7 @@ const INITIAL_INVENTORY: InventoryItem[] = [
 ];
 
 const App: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<{ id: string, email: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [state, setState] = useState<AppState>({
     photos: {},
@@ -58,42 +56,26 @@ const App: React.FC = () => {
   const [showKeyPrompt, setShowKeyPrompt] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        const cloudState = await loadUserState(currentUser.uid);
+    const initAuth = async () => {
+      const storedUser = localStorage.getItem('user');
+      const token = localStorage.getItem('token');
+
+      if (storedUser && token) {
+        const currentUser = JSON.parse(storedUser);
+        setUser(currentUser);
+        const cloudState = await loadUserState();
         if (cloudState) {
           setState(cloudState);
-        } else {
-          // Migration logic: if no cloud state but there is local state, migrate it
-          const localSaved = localStorage.getItem('atelier_state_v2');
-          if (localSaved) {
-            try {
-              const parsed = JSON.parse(localSaved);
-              const migratedState = {
-                ...parsed,
-                isPredicting: false,
-                isGeneratingStyles: false,
-                inventory: parsed.inventory || INITIAL_INVENTORY
-              };
-              setState(migratedState);
-              await saveUserState(currentUser.uid, migratedState);
-              // We can keep localStorage as a backup or clear it,
-              // but for safety let's just leave it for now.
-            } catch (e) {
-              console.error("Failed to migrate local state", e);
-            }
-          }
         }
       }
       setLoading(false);
-    });
-    return () => unsubscribe();
+    };
+    initAuth();
   }, []);
 
   useEffect(() => {
     if (user && !loading) {
-      saveUserState(user.uid, state);
+      saveUserState(state);
     }
   }, [state, user, loading]);
 
@@ -228,7 +210,15 @@ const App: React.FC = () => {
   }
 
   if (!user) {
-    return <Auth />;
+    return (
+      <Auth
+        onAuthSuccess={async (newUser) => {
+          setUser(newUser);
+          const cloudState = await loadUserState();
+          if (cloudState) setState(cloudState);
+        }}
+      />
+    );
   }
 
   return (
@@ -302,7 +292,11 @@ const App: React.FC = () => {
 
         <div className="p-4 border-t border-stone-800">
           <button
-            onClick={() => signOut(auth)}
+            onClick={() => {
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+              setUser(null);
+            }}
             className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl transition-all text-stone-400 hover:text-white hover:bg-stone-800"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
