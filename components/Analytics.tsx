@@ -7,7 +7,7 @@ interface AnalyticsProps {
 }
 
 const Analytics: React.FC<AnalyticsProps> = ({ state }) => {
-  const totalRevenue = state.orders.reduce((acc, o) => acc + o.price, 0);
+  const totalRevenue = state.orders.reduce((acc, o) => acc + o.totalPrice, 0);
   const activeProjects = state.orders.filter(o => o.status !== 'Delivered').length;
   
   const categoryStats = state.styleConcepts.reduce((acc: Record<string, number>, curr) => {
@@ -65,8 +65,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ state }) => {
                 <div className="h-1.5 w-full bg-stone-800 rounded-full overflow-hidden">
                   <div 
                     className="h-full bg-white transition-all duration-1000" 
-                    // Fix: Explicitly cast count to number as Object.entries returns [string, any][] or similar, causing arithmetic errors
-                    style={{ width: `${((count as number) / (state.styleConcepts.length || 1)) * 100}%` }}
+                    style={{ width: `${(count / (state.styleConcepts.length || 1)) * 100}%` }}
                   />
                 </div>
               </div>

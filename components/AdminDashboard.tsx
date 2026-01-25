@@ -6,9 +6,10 @@ interface AdminDashboardProps {
   inventory: InventoryItem[];
   onUpdateInventory: (item: InventoryItem) => void;
   onDeleteItem: (id: string) => void;
+  onReset: () => void;
 }
 
-const AdminDashboard: React.FC<AdminDashboardProps> = ({ inventory, onUpdateInventory, onDeleteItem }) => {
+const AdminDashboard: React.FC<AdminDashboardProps> = ({ inventory, onUpdateInventory, onDeleteItem, onReset }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const [newItem, setNewItem] = useState<Partial<InventoryItem>>({
@@ -86,12 +87,24 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ inventory, onUpdateInve
           <h2 className="text-4xl font-serif font-bold">Atelier Database</h2>
           <p className="text-stone-500 mt-2">Manage materials, tools, and garment addons.</p>
         </div>
-        <button 
-          onClick={() => setIsAdding(true)}
-          className="px-8 py-3 bg-stone-900 text-white rounded-full text-xs font-black uppercase tracking-widest hover:bg-stone-800 transition-all shadow-xl"
-        >
-          Add New Item
-        </button>
+        <div className="flex gap-4">
+          <button
+            onClick={() => {
+              if (confirm("Are you sure? This will clear all data and start a new fitting profile.")) {
+                onReset();
+              }
+            }}
+            className="px-8 py-3 bg-stone-100 text-stone-400 rounded-full text-xs font-black uppercase tracking-widest hover:bg-red-50 hover:text-red-600 transition-all"
+          >
+            Reset Atelier
+          </button>
+          <button
+            onClick={() => setIsAdding(true)}
+            className="px-8 py-3 bg-stone-900 text-white rounded-full text-xs font-black uppercase tracking-widest hover:bg-stone-800 transition-all shadow-xl"
+          >
+            Add New Item
+          </button>
+        </div>
       </div>
 
       {isAdding && (

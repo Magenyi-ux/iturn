@@ -6,9 +6,10 @@ import { analyzeFabric } from '../services/gemini';
 interface MaterialsLibraryProps {
   fabrics: Fabric[];
   onAdd: (fabric: Fabric) => void;
+  onRemove: (id: string) => void;
 }
 
-const MaterialsLibrary: React.FC<MaterialsLibraryProps> = ({ fabrics, onAdd }) => {
+const MaterialsLibrary: React.FC<MaterialsLibraryProps> = ({ fabrics, onAdd, onRemove }) => {
   const [analyzing, setAnalyzing] = useState<string | null>(null);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,12 +64,20 @@ const MaterialsLibrary: React.FC<MaterialsLibraryProps> = ({ fabrics, onAdd }) =
                 <p className="text-[10px] text-white/80 leading-relaxed italic">{fabric.aiAnalysis}</p>
               </div>
             </div>
-            <div className="p-6 space-y-2">
+            <div className="p-6 space-y-2 relative">
               <h3 className="font-serif font-bold text-stone-900">{fabric.name}</h3>
               <div className="flex justify-between items-center">
                 <span className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">{fabric.type}</span>
                 <span className="text-[10px] text-stone-900 font-bold">{fabric.weight}</span>
               </div>
+              <button
+                onClick={() => onRemove(fabric.id)}
+                className="absolute top-6 right-6 p-2 bg-white/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 hover:text-red-600 shadow-sm"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
             </div>
           </div>
         ))}

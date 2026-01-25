@@ -196,6 +196,7 @@ const App: React.FC = () => {
   };
 
   const addFabric = (f: Fabric) => setState(prev => ({ ...prev, fabrics: [f, ...prev.fabrics] }));
+  const removeFabric = (id: string) => setState(prev => ({ ...prev, fabrics: prev.fabrics.filter(f => f.id !== id) }));
   
   const updateOrderStatus = (id: string, status: Order['status']) => {
     setState(prev => ({
@@ -252,6 +253,26 @@ const App: React.FC = () => {
 
   const deleteInventoryItem = (id: string) => {
     setState(prev => ({ ...prev, inventory: prev.inventory.filter(i => i.id !== id) }));
+  };
+
+  const handleReset = () => {
+    setState({
+      photos: {},
+      measurements: INITIAL_MEASUREMENTS,
+      characteristics: INITIAL_CHARACTERISTICS,
+      isPredicting: false,
+      isGeneratingStyles: false,
+      styleConcepts: [],
+      selectedStyles: [],
+      userSuggestion: '',
+      view: 'vault',
+      clients: MOCK_CLIENTS,
+      fabrics: [],
+      orders: [],
+      currentClientName: '',
+      inventory: INITIAL_INVENTORY,
+      savedInspirations: []
+    });
   };
 
   const handleSaveInspiration = (inspiration: SavedInspiration) => {
@@ -329,6 +350,8 @@ const App: React.FC = () => {
             { id: 'vault', label: 'Client Vault', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
             { id: 'inspiration', label: 'Inspiration', icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' },
             { id: 'workroom', label: 'Workroom', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' },
+            { id: 'materials', label: 'Materials', icon: 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01' },
+            { id: 'analytics', label: 'Analytics', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
             { id: 'admin', label: 'Database', icon: 'M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7c-2 0-3 1-3 3zm0 4h16M4 15h16' },
             { id: 'archive', label: 'Saved Studio', icon: 'M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z' },
             { id: 'capture', label: 'New Fitting', icon: 'M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z' }
@@ -406,6 +429,7 @@ const App: React.FC = () => {
             inventory={state.inventory} 
             onUpdateInventory={updateInventory}
             onDeleteItem={deleteInventoryItem}
+            onReset={handleReset}
           />
         )}
 
@@ -413,6 +437,20 @@ const App: React.FC = () => {
           <BlueprintRoom 
             style={state.styleConcepts.find(s => s.id === state.selectedOrderId)!} 
             measurements={state.measurements} 
+          />
+        )}
+
+        {state.view === 'materials' && (
+          <MaterialsLibrary
+            fabrics={state.fabrics}
+            onAdd={addFabric}
+            onRemove={removeFabric}
+          />
+        )}
+
+        {state.view === 'analytics' && (
+          <Analytics
+            state={state}
           />
         )}
 
