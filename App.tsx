@@ -18,6 +18,7 @@ import PricingModal from './components/PricingModal';
 import { predictMeasurements, generateStyles } from './services/gemini';
 import Auth from './components/Auth';
 import { loadUserState, saveUserState } from './services/db';
+import { supabase } from './services/supabase';
 
 const MOCK_CLIENTS: Client[] = [
   { id: '1', name: 'Sebastian Vane', email: 'vane@example.com', phone: '+123', measurements: INITIAL_MEASUREMENTS, history: [], lastVisit: '2 days ago' },
@@ -57,20 +58,27 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const initAuth = async () => {
-      const storedUser = localStorage.getItem('user');
-      const token = localStorage.getItem('token');
-
-      if (storedUser && token) {
-        const currentUser = JSON.parse(storedUser);
-        setUser(currentUser);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser({ id: session.user.id, email: session.user.email! });
         const cloudState = await loadUserState();
-        if (cloudState) {
-          setState(cloudState);
-        }
+        if (cloudState) setState(cloudState);
       }
       setLoading(false);
     };
     initAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        setUser({ id: session.user.id, email: session.user.email! });
+        const cloudState = await loadUserState();
+        if (cloudState) setState(cloudState);
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -210,15 +218,7 @@ const App: React.FC = () => {
   }
 
   if (!user) {
-    return (
-      <Auth
-        onAuthSuccess={async (newUser) => {
-          setUser(newUser);
-          const cloudState = await loadUserState();
-          if (cloudState) setState(cloudState);
-        }}
-      />
-    );
+    return <Auth />;
   }
 
   return (
@@ -292,11 +292,7 @@ const App: React.FC = () => {
 
         <div className="p-4 border-t border-stone-800">
           <button
-            onClick={() => {
-              localStorage.removeItem('token');
-              localStorage.removeItem('user');
-              setUser(null);
-            }}
+            onClick={() => supabase.auth.signOut()}
             className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl transition-all text-stone-400 hover:text-white hover:bg-stone-800"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

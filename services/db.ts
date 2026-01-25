@@ -1,19 +1,38 @@
 import { AppState } from "../types";
-import { api } from "./api";
+import { supabase } from "./supabase";
 
 export const saveUserState = async (state: AppState) => {
   try {
-    await api.post('/user/state', state);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase
+      .from('user_state')
+      .upsert({ id: user.id, state: state });
+
+    if (error) throw error;
   } catch (error) {
     console.error("Error saving user state:", error);
-    throw error;
   }
 };
 
 export const loadUserState = async (): Promise<AppState | null> => {
   try {
-    const state = await api.get('/user/state');
-    return state;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const { data, error } = await supabase
+      .from('user_state')
+      .select('state')
+      .eq('id', user.id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+       console.error("Error loading user state:", error);
+       return null;
+    }
+
+    return data?.state as AppState || null;
   } catch (error) {
     console.error("Error loading user state:", error);
     return null;
