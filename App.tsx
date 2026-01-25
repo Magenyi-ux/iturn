@@ -48,6 +48,7 @@ const App: React.FC = () => {
     clients: MOCK_CLIENTS,
     fabrics: [],
     orders: [],
+    currentClientName: '',
     inventory: INITIAL_INVENTORY,
     savedInspirations: []
   });
@@ -131,6 +132,7 @@ const App: React.FC = () => {
       styleConcepts: [],
       view: 'capture',
       selectedClientId: undefined,
+      currentClientName: '',
       userSuggestion: ''
     }));
   };
@@ -152,7 +154,38 @@ const App: React.FC = () => {
   };
 
   const handleContinueToStyles = async () => {
-    setState(prev => ({ ...prev, isGeneratingStyles: true, view: 'styles' }));
+    // Automatically save or update client if name is provided
+    if (state.currentClientName) {
+      const existingIdx = state.clients.findIndex(c => c.id === state.selectedClientId);
+      const updatedClients = [...state.clients];
+
+      const clientData: Client = {
+        id: state.selectedClientId || Math.random().toString(36).substr(2, 9),
+        name: state.currentClientName,
+        email: '',
+        phone: '',
+        measurements: state.measurements,
+        history: existingIdx >= 0 ? state.clients[existingIdx].history : [],
+        lastVisit: 'Just now'
+      };
+
+      if (existingIdx >= 0) {
+        updatedClients[existingIdx] = clientData;
+      } else {
+        updatedClients.unshift(clientData);
+      }
+
+      setState(prev => ({
+        ...prev,
+        clients: updatedClients,
+        selectedClientId: clientData.id,
+        isGeneratingStyles: true,
+        view: 'styles'
+      }));
+    } else {
+      setState(prev => ({ ...prev, isGeneratingStyles: true, view: 'styles' }));
+    }
+
     try {
       const styles = await generateStyles(state.measurements, state.photos, state.userSuggestion);
       setState(prev => ({ ...prev, styleConcepts: styles, isGeneratingStyles: false }));
@@ -188,6 +221,7 @@ const App: React.FC = () => {
     setState(prev => ({
       ...prev,
       orders: [newOrder, ...prev.orders],
+      clients: prev.clients.map(c => c.id === newOrder.clientId ? { ...c, history: [...c.history, newOrder.id] } : c),
       view: 'workroom'
     }));
     setPricingContext(null);
@@ -280,7 +314,13 @@ const App: React.FC = () => {
           </div>
           <div className="hidden lg:block">
             <h1 className="text-lg font-serif font-bold">Atelier AI</h1>
-            <p className="text-[10px] uppercase tracking-widest text-stone-500 font-bold">Digital Tailoring</p>
+            <div className="flex items-center gap-2">
+              <p className="text-[10px] uppercase tracking-widest text-stone-500 font-bold">Digital Tailoring</p>
+              <div
+                className={`w-1.5 h-1.5 rounded-full ${isSupabaseConfigured ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`}
+                title={isSupabaseConfigured ? 'Cloud Sync Active' : 'Local Storage Mode'}
+              />
+            </div>
           </div>
         </div>
 
@@ -333,7 +373,15 @@ const App: React.FC = () => {
           ) : (
             <ClientVault 
               clients={state.clients} 
-              onSelect={(c) => setState(prev => ({ ...prev, selectedClientId: c.id }))} 
+              onSelect={(c) => {
+                const client = state.clients.find(cl => cl.id === c.id);
+                setState(prev => ({
+                  ...prev,
+                  selectedClientId: c.id,
+                  measurements: client?.measurements || INITIAL_MEASUREMENTS,
+                  currentClientName: client?.name || ''
+                }));
+              }}
               onNewProfile={handleNewProfile}
             />
           )
@@ -385,7 +433,9 @@ const App: React.FC = () => {
             measurements={state.measurements}
             isPredicting={state.isPredicting}
             userSuggestion={state.userSuggestion}
+            clientName={state.currentClientName || ''}
             onUpdate={(m) => setState(prev => ({ ...prev, measurements: m }))}
+            onNameChange={(name) => setState(prev => ({ ...prev, currentClientName: name }))}
             onSuggestionChange={(s) => setState(prev => ({ ...prev, userSuggestion: s }))}
             onContinue={handleContinueToStyles}
           />

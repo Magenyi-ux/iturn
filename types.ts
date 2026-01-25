@@ -99,6 +99,7 @@ export interface AppState {
   clients: Client[];
   fabrics: Fabric[];
   orders: Order[];
+  currentClientName?: string;
   inventory: InventoryItem[];
   savedInspirations: SavedInspiration[];
   currentOrder?: Order;

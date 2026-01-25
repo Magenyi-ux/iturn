@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '../services/supabase';
+import { supabase, isSupabaseConfigured } from '../services/supabase';
 
 const Auth: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -161,6 +161,19 @@ const Auth: React.FC = () => {
               {isLogin ? "Don't have a studio? Create one" : 'Already have a studio? Sign in'}
             </button>
           </div>
+
+          {!isSupabaseConfigured && (
+            <div className="mt-8 p-6 bg-amber-50 rounded-2xl border border-amber-100 space-y-3">
+              <p className="text-[10px] font-bold text-amber-800 uppercase tracking-widest flex items-center gap-2">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Setup Required
+              </p>
+              <p className="text-[11px] text-amber-700 leading-relaxed">
+                Cloud database is not connected. Sign in will be disabled.
+                Use <strong>Guest Mode</strong> or see <code>DATABASE_SETUP.md</code> to connect your Supabase account.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

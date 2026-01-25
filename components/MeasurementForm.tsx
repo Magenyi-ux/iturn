@@ -6,7 +6,9 @@ interface MeasurementFormProps {
   measurements: Measurements;
   isPredicting: boolean;
   userSuggestion: string;
+  clientName: string;
   onUpdate: (measurements: Measurements) => void;
+  onNameChange: (name: string) => void;
   onSuggestionChange: (suggestion: string) => void;
   onContinue: () => void;
 }
@@ -17,7 +19,9 @@ const MeasurementForm: React.FC<MeasurementFormProps> = ({
   measurements, 
   isPredicting, 
   userSuggestion,
+  clientName,
   onUpdate,
+  onNameChange,
   onSuggestionChange,
   onContinue 
 }) => {
@@ -64,9 +68,22 @@ const MeasurementForm: React.FC<MeasurementFormProps> = ({
   return (
     <div className="max-w-4xl mx-auto space-y-12">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-stone-100 pb-8">
-        <div className="space-y-2">
-          <h2 className="text-4xl font-serif font-bold">Client Profile</h2>
-          <p className="text-stone-500 italic">"The foundation of every masterpiece is precision."</p>
+        <div className="space-y-4 flex-1">
+          <div className="space-y-1">
+            <h2 className="text-4xl font-serif font-bold">Client Profile</h2>
+            <p className="text-stone-500 italic">"The foundation of every masterpiece is precision."</p>
+          </div>
+
+          <div className="space-y-2 max-w-sm">
+            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest px-1">Client Full Name</label>
+            <input
+              type="text"
+              value={clientName}
+              onChange={(e) => onNameChange(e.target.value)}
+              className="w-full px-6 py-4 bg-white border border-stone-100 rounded-2xl focus:ring-2 focus:ring-stone-900 outline-none transition-all font-serif text-xl shadow-sm"
+              placeholder="Enter client name..."
+            />
+          </div>
         </div>
 
         <div className="flex bg-stone-100 p-1.5 rounded-xl border border-stone-200">
