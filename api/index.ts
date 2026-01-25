@@ -4,21 +4,24 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { User } from './models/User.js';
+import { User } from './models/User';
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI!)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.error('MongoDB connection error:', err));
+// MongoDB Connection (Serverless optimized)
+let cachedDb: typeof mongoose | null = null;
+async function connectToDatabase() {
+  if (cachedDb) return cachedDb;
+  const db = await mongoose.connect(process.env.MONGODB_URI!);
+  cachedDb = db;
+  return db;
+}
 
 // Auth Middleware
 const authenticateToken = (req: any, res: any, next: any) => {
@@ -37,6 +40,7 @@ const authenticateToken = (req: any, res: any, next: any) => {
 // Routes
 app.post('/api/auth/signup', async (req, res) => {
   try {
+    await connectToDatabase();
     const { email, password } = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: 'User already exists' });
@@ -54,6 +58,7 @@ app.post('/api/auth/signup', async (req, res) => {
 
 app.post('/api/auth/login', async (req, res) => {
   try {
+    await connectToDatabase();
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: 'User not found' });
@@ -70,6 +75,7 @@ app.post('/api/auth/login', async (req, res) => {
 
 app.get('/api/user/state', authenticateToken, async (req: any, res) => {
   try {
+    await connectToDatabase();
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
     res.json(user.state);
@@ -80,6 +86,7 @@ app.get('/api/user/state', authenticateToken, async (req: any, res) => {
 
 app.post('/api/user/state', authenticateToken, async (req: any, res) => {
   try {
+    await connectToDatabase();
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -91,6 +98,11 @@ app.post('/api/user/state', authenticateToken, async (req: any, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+export default app;
