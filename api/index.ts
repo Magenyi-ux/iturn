@@ -42,7 +42,7 @@ app.post('/api/auth/signup', async (req, res) => {
   try {
     await connectToDatabase();
     const { email, password } = req.body;
-    const existingUser = await User.findOne({ email });
+    const existingUser = await (User as any).findOne({ email });
     if (existingUser) return res.status(400).json({ message: 'User already exists' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -60,7 +60,7 @@ app.post('/api/auth/login', async (req, res) => {
   try {
     await connectToDatabase();
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    const user = await (User as any).findOne({ email });
     if (!user) return res.status(400).json({ message: 'User not found' });
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -76,7 +76,7 @@ app.post('/api/auth/login', async (req, res) => {
 app.get('/api/user/state', authenticateToken, async (req: any, res) => {
   try {
     await connectToDatabase();
-    const user = await User.findById(req.user.id);
+    const user = await (User as any).findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
     res.json(user.state);
   } catch (error: any) {
@@ -87,7 +87,7 @@ app.get('/api/user/state', authenticateToken, async (req: any, res) => {
 app.post('/api/user/state', authenticateToken, async (req: any, res) => {
   try {
     await connectToDatabase();
-    const user = await User.findById(req.user.id);
+    const user = await (User as any).findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     user.state = req.body;
