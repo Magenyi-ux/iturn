@@ -2,6 +2,11 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Measurements, StyleConcept, PhysicalCharacteristics, ViewAngle, DisplayMode, Fabric } from "../types";
 
+const sanitizeInput = (input: string): string => {
+  // A basic sanitization to remove characters that might be used in prompt injection.
+  return input.replace(/[<>{}[\]|`]/g, '');
+};
+
 async function withRetry<T>(fn: () => Promise<T>, maxRetries: number = 3, initialDelay: number = 3000): Promise<T> {
   let lastError: any;
   for (let i = 0; i < maxRetries; i++) {
@@ -71,9 +76,10 @@ export const searchInspiration = async (query: string): Promise<{ text: string, 
   return withRetry(async () => {
     // API key is implicitly provided by the AI Studio environment.
     const ai = new GoogleGenAI();
+    const sanitizedQuery = sanitizeInput(query);
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `Search for high-end fashion design, textile patterns, couture silhouettes, and bespoke tailoring elements related to: "${query}". Provide a deep aesthetic synthesis of the trend.`,
+      contents: `Search for high-end fashion design, textile patterns, couture silhouettes, and bespoke tailoring elements related to: "${sanitizedQuery}". Provide a deep aesthetic synthesis of the trend.`,
       config: {
         tools: [{ googleSearch: {} }]
       }
@@ -110,13 +116,14 @@ export const refineDesign = async (baseImage: string, sketchOverlay: string, ins
     const ai = new GoogleGenAI();
     const base = await standardizeImage(baseImage, 512);
     const sketch = await standardizeImage(sketchOverlay, 512);
+    const sanitizedInstructions = sanitizeInput(instructions);
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: {
         parts: [
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(base) } },
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(sketch) } },
-          { text: `Refine this high-fashion garment. Instructions: ${instructions}. Focus on luxurious fabric texture, intricate sewing details, and artistic silhouettes. The output must be a stunning, high-fashion editorial photograph.` }
+          { text: `Refine this high-fashion garment. Instructions: ${sanitizedInstructions}. Focus on luxurious fabric texture, intricate sewing details, and artistic silhouettes. The output must be a stunning, high-fashion editorial photograph.` }
         ]
       },
       config: { imageConfig: { aspectRatio: "3:4" } }
@@ -207,12 +214,13 @@ export const generateStyles = async (measurements: Measurements, photos: Record<
     // API key is implicitly provided by the AI Studio environment.
     const ai = new GoogleGenAI();
     const img = await standardizeImage(photos.front, 512);
+    const sanitizedSuggestion = sanitizeInput(suggestion);
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: {
         parts: [
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(img) } },
-          { text: `Create 30 visionary cloth designs and couture concepts. Focus on garment artistry, unique fabric combinations, and avant-garde or classic bespoke silhouettes. User preference: ${suggestion}. Proportions for drape analysis: ${JSON.stringify(measurements)}.` }
+          { text: `Create 30 visionary cloth designs and couture concepts. Focus on garment artistry, unique fabric combinations, and avant-garde or classic bespoke silhouettes. User preference: ${sanitizedSuggestion}. Proportions for drape analysis: ${JSON.stringify(measurements)}.` }
         ]
       },
       config: {
