@@ -116,7 +116,7 @@ export const refineDesign = async (baseImage: string, sketchOverlay: string, ins
         parts: [
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(base) } },
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(sketch) } },
-          { text: `Refine this high-fashion garment. Instructions: ${instructions}. Focus on luxurious fabric texture, intricate sewing details, and artistic silhouettes. The output must be a stunning, high-fashion editorial photograph.` }
+          { text: `SYSTEM: Refine this high-fashion garment based on user instructions. Focus on luxurious fabric texture, intricate sewing details, and artistic silhouettes. The output must be a stunning, high-fashion editorial photograph.\n\nUSER INSTRUCTIONS: ${instructions}` }
         ]
       },
       config: { imageConfig: { aspectRatio: "3:4" } }
