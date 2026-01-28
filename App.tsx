@@ -15,6 +15,7 @@ import StyleTimeline from './components/StyleTimeline';
 import SavedStudio from './components/SavedStudio';
 import AdminDashboard from './components/AdminDashboard';
 import PricingModal from './components/PricingModal';
+import Profile from './components/Profile';
 import { predictMeasurements, generateStyles } from './services/gemini';
 import Auth from './components/Auth';
 import { loadUserState, saveUserState } from './services/db';
@@ -291,7 +292,8 @@ const App: React.FC = () => {
             { id: 'workroom', label: 'Workroom', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' },
             { id: 'admin', label: 'Database', icon: 'M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7c-2 0-3 1-3 3zm0 4h16M4 15h16' },
             { id: 'archive', label: 'Saved Studio', icon: 'M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z' },
-            { id: 'capture', label: 'New Fitting', icon: 'M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z' }
+            { id: 'capture', label: 'New Fitting', icon: 'M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z' },
+            { id: 'profile', label: 'Profile', icon: 'M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z' }
           ].map((item) => (
             <button
               key={item.id}
@@ -379,6 +381,14 @@ const App: React.FC = () => {
         )}
 
         {state.view === 'capture' && <PhotoUpload onPhotosComplete={handlePhotosComplete} />}
+
+        {state.view === 'profile' && user && (
+          <Profile
+            state={state}
+            user={user}
+            onNavigate={(view) => setState(prev => ({ ...prev, view }))}
+          />
+        )}
 
         {state.view === 'measurements' && (
           <MeasurementForm 
