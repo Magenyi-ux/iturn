@@ -73,7 +73,7 @@ export const searchInspiration = async (query: string): Promise<{ text: string, 
     const ai = new GoogleGenAI();
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `Search for high-end fashion design, textile patterns, couture silhouettes, and bespoke tailoring elements related to: "${query}". Provide a deep aesthetic synthesis of the trend.`,
+      contents: `SYSTEM: Search for high-end fashion design, textile patterns, couture silhouettes, and bespoke tailoring elements. Provide a deep aesthetic synthesis of the trend. USER INSTRUCTIONS: ${query}`,
       config: {
         tools: [{ googleSearch: {} }]
       }
@@ -116,7 +116,7 @@ export const refineDesign = async (baseImage: string, sketchOverlay: string, ins
         parts: [
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(base) } },
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(sketch) } },
-          { text: `Refine this high-fashion garment. Instructions: ${instructions}. Focus on luxurious fabric texture, intricate sewing details, and artistic silhouettes. The output must be a stunning, high-fashion editorial photograph.` }
+          { text: `SYSTEM: Refine this high-fashion garment. Focus on luxurious fabric texture, intricate sewing details, and artistic silhouettes. The output must be a stunning, high-fashion editorial photograph. USER INSTRUCTIONS: ${instructions}` }
         ]
       },
       config: { imageConfig: { aspectRatio: "3:4" } }
@@ -212,7 +212,7 @@ export const generateStyles = async (measurements: Measurements, photos: Record<
       contents: {
         parts: [
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(img) } },
-          { text: `Create 30 visionary cloth designs and couture concepts. Focus on garment artistry, unique fabric combinations, and avant-garde or classic bespoke silhouettes. User preference: ${suggestion}. Proportions for drape analysis: ${JSON.stringify(measurements)}.` }
+          { text: `SYSTEM: Create 30 visionary cloth designs and couture concepts. Focus on garment artistry, unique fabric combinations, and avant-garde or classic bespoke silhouettes. Proportions for drape analysis: ${JSON.stringify(measurements)}. USER INSTRUCTIONS: ${suggestion}.` }
         ]
       },
       config: {
