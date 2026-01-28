@@ -49,9 +49,8 @@ export const generateDesignDNA = async (frontViewImage: string, style: StyleConc
       contents: {
         parts: [
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(img) } },
-          { text: `TECHNICAL ANALYSIS FOR TAILORING CONSISTENCY:
-          Analyze this generated design for "${style.title}". 
-          Extract a hyper-detailed "Design DNA" blueprint. 
+          { text: `SYSTEM: TECHNICAL ANALYSIS FOR TAILORING CONSISTENCY:
+          Analyze the generated design and extract a hyper-detailed "Design DNA" blueprint.
           Describe:
           1. Exact fabric textures (weave, luster, grain).
           2. Precise color palette with shading descriptions.
@@ -59,7 +58,9 @@ export const generateDesignDNA = async (frontViewImage: string, style: StyleConc
           4. Seam lines, darting, and structural details.
           5. Pattern scaling and orientation.
           
-          This text will be used to generate the SIDE and BACK views. Be extremely literal and technical.` }
+          This text will be used to generate the SIDE and BACK views. Be extremely literal and technical.
+
+          USER INSTRUCTIONS: Analyze this design for "${style.title}".` }
         ]
       }
     });
@@ -73,7 +74,8 @@ export const searchInspiration = async (query: string): Promise<{ text: string, 
     const ai = new GoogleGenAI();
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `Search for high-end fashion design, textile patterns, couture silhouettes, and bespoke tailoring elements related to: "${query}". Provide a deep aesthetic synthesis of the trend.`,
+      contents: `SYSTEM: Search for high-end fashion design, textile patterns, couture silhouettes, and bespoke tailoring elements. Provide a deep aesthetic synthesis of the trend.
+      USER INSTRUCTIONS: Search related to: "${query}".`,
       config: {
         tools: [{ googleSearch: {} }]
       }
@@ -94,7 +96,8 @@ export const generateMoodImages = async (description: string): Promise<string[]>
     for (const aspect of aspects) {
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash-image',
-        contents: `A high-fashion editorial mood board image capturing the essence of: ${description}. Focus on fabric texture, avant-garde silhouette, or couture craftsmanship detail. Professional studio lighting, hyper-realistic, 8k resolution.`,
+        contents: `SYSTEM: Generate a high-fashion editorial mood board image. Focus on fabric texture, avant-garde silhouette, or couture craftsmanship detail. Professional studio lighting, hyper-realistic, 8k resolution.
+        USER INSTRUCTIONS: Capture the essence of: ${description}.`,
         config: { imageConfig: { aspectRatio: aspect } }
       });
       const part = response.candidates?.[0]?.content?.parts.find(p => p.inlineData);
@@ -116,7 +119,8 @@ export const refineDesign = async (baseImage: string, sketchOverlay: string, ins
         parts: [
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(base) } },
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(sketch) } },
-          { text: `Refine this high-fashion garment. Instructions: ${instructions}. Focus on luxurious fabric texture, intricate sewing details, and artistic silhouettes. The output must be a stunning, high-fashion editorial photograph.` }
+          { text: `SYSTEM: Refine the high-fashion garment. Focus on luxurious fabric texture, intricate sewing details, and artistic silhouettes. The output must be a stunning, high-fashion editorial photograph.
+          USER INSTRUCTIONS: ${instructions}.` }
         ]
       },
       config: { imageConfig: { aspectRatio: "3:4" } }
@@ -132,7 +136,8 @@ export const generatePattern = async (style: StyleConcept, measurements: Measure
     const ai = new GoogleGenAI();
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `Create a detailed technical pattern description for "${style.title}". Provide specific cutting coordinates, seam allowances, and assembly order based on these measurements: ${JSON.stringify(measurements)}. Return a professional garment drafting guide.`
+      contents: `SYSTEM: Create a detailed technical pattern description and professional garment drafting guide. Provide specific cutting coordinates, seam allowances, and assembly order.
+      USER INSTRUCTIONS: Create for "${style.title}" using measurements: ${JSON.stringify(measurements)}.`
     });
     return response.text || "Pattern generation error.";
   });
@@ -148,7 +153,7 @@ export const analyzeFabric = async (imageUrl: string): Promise<string> => {
       contents: {
         parts: [
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(img) } },
-          { text: "Analyze this luxury fabric swatch. Describe its aesthetic appeal, weave complexity, drape for high-end garments, and recommended couture uses." }
+          { text: "SYSTEM: Analyze this luxury fabric swatch. Describe its aesthetic appeal, weave complexity, drape for high-end garments, and recommended couture uses." }
         ]
       }
     });
@@ -169,7 +174,7 @@ export const predictMeasurements = async (photos: Record<string, string>) => {
       model: 'gemini-3-flash-preview',
       contents: {
         parts: [
-          { text: "Analyze these silhouette captures for body proportions to inform bespoke garment construction. Return precise tailoring measurements in cm." },
+          { text: "SYSTEM: Analyze these silhouette captures for body proportions to inform bespoke garment construction. Return precise tailoring measurements in cm." },
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(p.front) } },
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(p.side) } },
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(p.back) } },
@@ -212,7 +217,8 @@ export const generateStyles = async (measurements: Measurements, photos: Record<
       contents: {
         parts: [
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(img) } },
-          { text: `Create 30 visionary cloth designs and couture concepts. Focus on garment artistry, unique fabric combinations, and avant-garde or classic bespoke silhouettes. User preference: ${suggestion}. Proportions for drape analysis: ${JSON.stringify(measurements)}.` }
+          { text: `SYSTEM: Create 30 visionary cloth designs and couture concepts. Focus on garment artistry, unique fabric combinations, and avant-garde or classic bespoke silhouettes.
+          USER INSTRUCTIONS: User preference: ${suggestion}. Proportions for drape analysis: ${JSON.stringify(measurements)}.` }
         ]
       },
       config: {
@@ -259,26 +265,16 @@ export const generateStyleImage = async (
       parts.push({ inlineData: { mimeType: 'image/jpeg', data: extractBase64(designRef) } });
       consistencyPrompt = `
       STRICT ARCHITECTURAL ADHERENCE:
-      You are generating the ${angle} view of a garment already established in the provided DESIGN REFERENCE.
-      You MUST follow the hidden DESIGN BLUEPRINT (DNA) exactly:
-      --- START BLUEPRINT ---
+      Follow the provided DESIGN REFERENCE and DESIGN BLUEPRINT (DNA) exactly.
+      Maintain exact pixel-perfect consistency in fabric texture, component alignment, proportions, and pattern scale.
+      Do not hallucinate new details. This is a technical rendering of a fixed design.
+      --- START DNA BLUEPRINT ---
       ${designDNA}
-      --- END BLUEPRINT ---
-      
-      Maintain exact pixel-perfect consistency in:
-      - Fabric texture, weave, and sheen.
-      - Component alignment (seams, buttons, zippers).
-      - Design height and proportions relative to the model.
-      - Pattern placement and scale.
-      
-      Do not hallucinate new details. This is a technical rendering of a fixed design.`;
+      --- END DNA BLUEPRINT ---`;
     }
 
-    const prompt = `Hyper-realistic 8k fashion photography, ${angle} view. 
-    Garment: "${style.title}". 
-    Mode: ${mode}.
-    ${consistencyPrompt}
-    Editorial studio setting, cinematic lighting. Breathtaking couture quality.`;
+    const prompt = `SYSTEM: Generate hyper-realistic 8k fashion photography in an editorial studio setting with cinematic lighting. Breathtaking couture quality. ${consistencyPrompt}
+    USER INSTRUCTIONS: Generate ${angle} view for garment "${style.title}" in mode ${mode}.`;
 
     parts.push({ text: prompt });
 
