@@ -74,24 +74,24 @@ const InspirationHub: React.FC<InspirationHubProps> = ({ onGenerate, onSaveInspi
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-16 pb-32 animate-in fade-in duration-700">
+    <div className="max-w-7xl mx-auto space-y-16 pb-32 animate-in fade-in slide-in-from-bottom-6 duration-1000">
       {/* Lightbox Modal */}
       {maximizedImage && (
         <div 
-          className="fixed inset-0 z-[100] bg-stone-900/95 backdrop-blur-2xl flex items-center justify-center p-8 cursor-zoom-out animate-in fade-in duration-300"
+          className="fixed inset-0 z-[100] bg-stone-900/95 backdrop-blur-2xl flex items-center justify-center p-6 cursor-zoom-out animate-in fade-in duration-500"
           onClick={() => setMaximizedImage(null)}
         >
           <div className="relative max-w-5xl w-full max-h-full flex items-center justify-center">
             <img 
               src={maximizedImage} 
-              className="max-w-full max-h-[90vh] object-contain shadow-[0_0_100px_rgba(0,0,0,0.5)] rounded-lg animate-in zoom-in-95 duration-500"
+              className="max-w-full max-h-[85vh] object-contain shadow-2xl rounded-3xl animate-in zoom-in-95 duration-500"
               alt="Maximized view"
             />
             <button 
-              className="absolute top-0 right-0 -mt-12 text-white/50 hover:text-white transition-colors"
+              className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors bg-black/20 backdrop-blur-md p-3 rounded-full"
               onClick={() => setMaximizedImage(null)}
             >
-              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -100,26 +100,33 @@ const InspirationHub: React.FC<InspirationHubProps> = ({ onGenerate, onSaveInspi
       )}
 
       <div className="text-center space-y-4">
-        <h2 className="text-6xl font-serif font-bold tracking-tight text-stone-900">Inspiration Hub</h2>
-        <p className="text-stone-400 font-serif italic text-lg">"Gleaning the world's aesthetic for the next masterpiece."</p>
+        <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-300">Couture Discovery</span>
+        <h2 className="text-6xl md:text-8xl font-serif font-bold tracking-tighter text-stone-900">Inspiration Hub</h2>
+        <p className="text-stone-400 font-serif italic text-lg md:text-2xl">"Gleaning the world's aesthetic for the next masterpiece."</p>
       </div>
 
-      <div className="max-w-3xl mx-auto">
-        <div className="relative group">
+      <div className="max-w-4xl mx-auto">
+        <div className="relative group bg-white rounded-[3rem] p-4 shadow-[0_30px_60px_rgba(0,0,0,0.03)] border border-stone-50 transition-all hover:shadow-[0_40px_80px_rgba(0,0,0,0.06)]">
           <input 
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            className="w-full h-24 bg-transparent border-b-2 border-stone-200 focus:border-stone-900 outline-none text-4xl font-serif text-center transition-all placeholder:text-stone-100"
-            placeholder="Search silhouettes..."
+            className="w-full h-20 md:h-32 bg-transparent outline-none text-2xl md:text-5xl font-serif text-center transition-all placeholder:text-stone-100 px-12"
+            placeholder="Seek silhouettes..."
           />
           <button 
             onClick={handleSearch}
             disabled={loading}
-            className="absolute right-0 top-1/2 -translate-y-1/2 p-4 bg-stone-900 text-white rounded-2xl shadow-xl hover:scale-110 active:scale-95 transition-all disabled:opacity-50"
+            className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-16 h-16 md:w-24 md:h-24 bg-stone-900 text-white rounded-[2rem] shadow-2xl shadow-stone-200 hover:bg-stone-800 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center overflow-hidden"
           >
-            {loading ? <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin"></div> : "Seek"}
+            {loading ? (
+              <div className="w-8 h-8 border-3 border-white/20 border-t-white rounded-full animate-spin"></div>
+            ) : (
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            )}
           </button>
         </div>
 
@@ -190,12 +197,12 @@ const InspirationHub: React.FC<InspirationHubProps> = ({ onGenerate, onSaveInspi
              </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-16 items-start">
-             <div className="lg:col-span-2 space-y-8 bg-white p-16 rounded-[4rem] border border-stone-100 shadow-sm relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-stone-50 rounded-bl-[4rem] flex items-center justify-center">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-16 items-start px-4 lg:px-0">
+             <div className="lg:col-span-2 space-y-8 bg-white p-10 md:p-16 rounded-[4rem] border border-stone-100 shadow-sm relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-stone-50 rounded-bl-[4rem] flex items-center justify-center transition-colors group-hover:bg-stone-100">
                    <button 
                     onClick={() => handleSaveItem('text', results.text, 'synthesis')}
-                    className={`p-6 rounded-bl-[4rem] transition-all ${savedStatus['synthesis'] ? 'bg-amber-500 text-white' : 'text-stone-300 hover:text-stone-900'}`}
+                    className={`p-8 rounded-bl-[4rem] transition-all ${savedStatus['synthesis'] ? 'bg-emerald-500 text-white shadow-xl' : 'text-stone-200 hover:text-stone-900'}`}
                     title="Bookmark Synthesis"
                    >
                      <svg className="w-8 h-8" fill={savedStatus['synthesis'] ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
@@ -203,11 +210,11 @@ const InspirationHub: React.FC<InspirationHubProps> = ({ onGenerate, onSaveInspi
                      </svg>
                    </button>
                 </div>
-                <h3 className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-300 border-b pb-4 flex justify-between items-center">
-                  Synthesis & Analysis
-                  {savedStatus['synthesis'] && <span className="text-amber-500 animate-pulse">Archived</span>}
+                <h3 className="text-[9px] font-black uppercase tracking-[0.4em] text-stone-300 border-b border-stone-100 pb-6 flex justify-between items-center">
+                  Aesthetic Synthesis
+                  {savedStatus['synthesis'] && <span className="text-emerald-500 font-black tracking-widest uppercase text-[8px] flex items-center gap-2"><span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Stored in Vault</span>}
                 </h3>
-                <p className="text-3xl font-serif text-stone-800 leading-relaxed italic pr-12">
+                <p className="text-3xl md:text-4xl font-serif text-stone-900 leading-[1.4] italic pr-12 md:pr-24 tracking-tight">
                    "{results.text}"
                 </p>
              </div>

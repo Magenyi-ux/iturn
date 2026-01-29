@@ -99,30 +99,33 @@ const StyleCatalog: React.FC<StyleCatalogProps> = ({ concepts, measurements, cha
   const filtered = filter === 'All' ? concepts : concepts.filter(c => c.category === filter);
 
   return (
-    <div className="space-y-12 pb-24">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-8 border-b border-stone-100 pb-12">
-        <div className="text-left space-y-2">
-          <h2 className="text-4xl font-serif font-bold text-stone-900">Design Collection</h2>
-          <p className="text-stone-500">Couture concepts curated for your silhouette. Utilizing secret DNA profiling for multi-view accuracy.</p>
+    <div className="space-y-16 pb-24 animate-in fade-in slide-in-from-bottom-6 duration-1000">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10 border-b border-stone-100 pb-16">
+        <div className="space-y-4 max-w-2xl">
+          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-300">Couture Intelligence</span>
+          <h2 className="text-5xl md:text-6xl font-serif font-bold text-stone-900 tracking-tight">Design Collection</h2>
+          <p className="text-stone-400 text-sm md:text-base font-medium leading-relaxed">
+            Curated concepts utilizing secret DNA profiling for multi-view accuracy. Each design is structurally synchronized to your silhouette.
+          </p>
         </div>
         
-        <div className="flex bg-stone-100 p-1.5 rounded-2xl border border-stone-200">
+        <div className="flex bg-stone-50 p-2 rounded-[2rem] border border-stone-100 self-start lg:self-auto shadow-inner shadow-stone-200/50">
           <button 
             onClick={() => setDisplayMode('mannequin')}
-            className={`px-6 py-2.5 rounded-xl text-xs font-bold tracking-widest uppercase transition-all ${displayMode === 'mannequin' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-400'}`}
+            className={`px-8 py-4 rounded-[1.5rem] text-[10px] font-black tracking-widest uppercase transition-all duration-500 ${displayMode === 'mannequin' ? 'bg-white text-stone-900 shadow-xl shadow-stone-200/50' : 'text-stone-300 hover:text-stone-500'}`}
           >
-            Digital Dress Form
+            Form
           </button>
           <button 
             onClick={() => setDisplayMode('avatar')}
-            className={`px-6 py-2.5 rounded-xl text-xs font-bold tracking-widest uppercase transition-all ${displayMode === 'avatar' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-400'}`}
+            className={`px-8 py-4 rounded-[1.5rem] text-[10px] font-black tracking-widest uppercase transition-all duration-500 ${displayMode === 'avatar' ? 'bg-white text-stone-900 shadow-xl shadow-stone-200/50' : 'text-stone-300 hover:text-stone-500'}`}
           >
-            Runway Avatar
+            Avatar
           </button>
         </div>
       </div>
 
-      <div className="flex flex-wrap justify-center gap-3">
+      <div className="flex flex-wrap gap-4 overflow-x-auto pb-4 lg:pb-0 scrollbar-hide">
         {categories.map(cat => (
           <button
             key={cat}
@@ -134,7 +137,7 @@ const StyleCatalog: React.FC<StyleCatalogProps> = ({ concepts, measurements, cha
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
         {filtered.map(style => {
           const modeVisuals = visuals[style.id]?.[displayMode] || {};
           const currentProgress = scrollProgress[style.id] || 0;
@@ -150,8 +153,8 @@ const StyleCatalog: React.FC<StyleCatalogProps> = ({ concepts, measurements, cha
           const isLoading = !!loading[style.id];
 
           return (
-            <div key={style.id} className="bg-white rounded-3xl overflow-hidden border border-stone-100 shadow-sm flex flex-col md:flex-row h-full hover:shadow-xl transition-all">
-              <div className="md:w-1/2 aspect-[3/4] bg-stone-50 relative group select-none">
+            <div key={style.id} className="bg-white rounded-[4rem] overflow-hidden border border-stone-100 hover:shadow-[0_40px_80px_rgba(0,0,0,0.06)] transition-all duration-700 flex flex-col xl:flex-row h-full group/card">
+              <div className="xl:w-1/2 aspect-[3/4] bg-stone-50 relative group select-none overflow-hidden">
                 {currentImage ? (
                   <div className="w-full h-full relative overflow-hidden">
                     <img src={currentImage} className="w-full h-full object-cover transition-opacity duration-300" alt={style.title} />
@@ -240,27 +243,27 @@ const StyleCatalog: React.FC<StyleCatalogProps> = ({ concepts, measurements, cha
                 )}
               </div>
 
-              <div className="flex-1 p-8 flex flex-col space-y-6">
-                <div>
-                  <div className="flex justify-between items-start">
-                    <span className="text-[10px] font-bold text-stone-400 uppercase tracking-[0.3em]">{style.category}</span>
+              <div className="flex-1 p-10 flex flex-col space-y-10">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[9px] font-black text-stone-300 uppercase tracking-[0.4em]">{style.category}</span>
                     <button 
                       onClick={() => setExpandedId(expandedId === style.id ? null : style.id)}
-                      className="text-[10px] font-bold text-stone-900 uppercase tracking-widest border-b border-stone-900"
+                      className="text-[9px] font-black text-stone-900 uppercase tracking-[0.2em] border-b-2 border-stone-900 pb-0.5 hover:text-stone-500 hover:border-stone-200 transition-all"
                     >
-                      {expandedId === style.id ? 'Hide Details' : 'View Construction'}
+                      {expandedId === style.id ? 'Close' : 'Technical File'}
                     </button>
                   </div>
-                  <h3 className="text-2xl font-serif font-bold mt-2 text-stone-800">{style.title}</h3>
+                  <h3 className="text-4xl font-serif font-bold text-stone-900 tracking-tight leading-none group-hover/card:text-stone-600 transition-colors">{style.title}</h3>
                 </div>
 
-                <div className="space-y-4">
-                  <p className="text-stone-500 text-sm leading-relaxed italic border-l-2 border-stone-200 pl-4">
+                <div className="space-y-6 flex-1">
+                  <p className="text-stone-400 text-sm md:text-base font-medium leading-relaxed italic border-l-4 border-stone-100 pl-6">
                     "{style.description}"
                   </p>
-                  <div className="flex flex-wrap gap-2">
-                    {style.materials.slice(0, 3).map(m => (
-                      <span key={m} className="px-2 py-1 bg-stone-50 border border-stone-200 rounded text-[9px] text-stone-600 font-bold uppercase tracking-tight">
+                  <div className="flex flex-wrap gap-3">
+                    {style.materials.slice(0, 4).map(m => (
+                      <span key={m} className="px-4 py-2 bg-stone-50 border border-stone-100 rounded-xl text-[9px] text-stone-500 font-black uppercase tracking-widest">
                         {m}
                       </span>
                     ))}
@@ -268,50 +271,50 @@ const StyleCatalog: React.FC<StyleCatalogProps> = ({ concepts, measurements, cha
                 </div>
 
                 {expandedId === style.id ? (
-                  <div className="flex-1 space-y-6 animate-in fade-in slide-in-from-top-4 duration-500 overflow-y-auto max-h-60 pr-2">
-                    <div className="space-y-3">
-                      <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest">Atelier Instructions</p>
-                      <ul className="space-y-3">
+                  <div className="animate-in fade-in slide-in-from-top-4 duration-500 bg-stone-50 p-8 rounded-[2.5rem] border border-stone-100 overflow-y-auto max-h-64 scrollbar-hide">
+                    <div className="space-y-6">
+                      <p className="text-[9px] font-black text-stone-400 uppercase tracking-[0.3em] border-b border-stone-200 pb-3">Construction Protocol</p>
+                      <ul className="space-y-4">
                         {style.steps.map((s, i) => (
-                          <li key={i} className="flex gap-4 text-xs text-stone-600 leading-relaxed items-start">
-                            <span className="w-5 h-5 flex-shrink-0 bg-stone-900 text-white rounded-full flex items-center justify-center font-bold text-[8px]">{i+1}</span>
-                            <span>{s}</span>
+                          <li key={i} className="flex gap-5 text-xs text-stone-600 font-medium leading-relaxed items-start">
+                            <span className="w-6 h-6 flex-shrink-0 bg-white border border-stone-200 text-stone-900 rounded-full flex items-center justify-center font-black text-[9px] shadow-sm">{i+1}</span>
+                            <span className="pt-1">{s}</span>
                           </li>
                         ))}
                       </ul>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex-1 flex items-end">
-                    <div className="w-full p-4 bg-stone-50/50 rounded-2xl border border-stone-100 flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center">
-                        <svg className="w-4 h-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758L5 19m0-14l3.121 3.121" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <div className="flex items-end gap-4">
+                    <div className="flex-1 p-6 bg-stone-50/50 rounded-[2rem] border border-stone-100/50 flex items-center gap-4 group/status">
+                      <div className="w-10 h-10 rounded-2xl bg-white border border-stone-100 flex items-center justify-center shadow-sm group-hover/status:bg-stone-900 group-hover/status:text-white transition-all duration-500">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       </div>
-                      <p className="text-[9px] font-bold text-stone-400 uppercase tracking-widest italic">
-                        {hasRefinements ? `Saved Design #${refinementIndex + 1} Active` : 'Couture blueprint secured'}
+                      <p className="text-[9px] font-black text-stone-300 uppercase tracking-[0.2em] italic leading-tight">
+                        {hasRefinements ? `Refined Version #${refinementIndex + 1} Selected` : 'Design integrity verified'}
                       </p>
                     </div>
                   </div>
                 )}
 
-                <div className="pt-6 border-t border-stone-50 flex items-center justify-between">
+                <div className="pt-10 border-t border-stone-100 flex flex-col sm:flex-row items-center justify-between gap-6">
                    <div className="flex gap-2">
-                      <div className={`w-2 h-2 rounded-full ${currentRefinedImage ? 'bg-blue-500 animate-pulse' : 'bg-stone-900'}`}></div>
-                      <div className="w-2 h-2 rounded-full bg-stone-300"></div>
-                      <div className="w-2 h-2 rounded-full bg-stone-100 border border-stone-200"></div>
+                      <div className={`w-3 h-3 rounded-full ${currentRefinedImage ? 'bg-emerald-400 animate-pulse' : 'bg-stone-900'}`}></div>
+                      <div className="w-3 h-3 rounded-full bg-stone-200"></div>
+                      <div className="w-3 h-3 rounded-full bg-stone-100 border border-stone-200"></div>
                    </div>
-                   <div className="flex gap-2">
+                   <div className="flex gap-4 w-full sm:w-auto">
                      <button 
                        onClick={() => onCreateOrder(style)}
-                       className="px-6 py-2 bg-stone-100 text-stone-900 border border-stone-200 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-stone-900 hover:text-white transition-all shadow-sm"
+                       className="flex-1 sm:flex-none px-8 py-5 bg-stone-50 text-stone-900 border border-stone-100 rounded-[2rem] text-[9px] font-black uppercase tracking-[0.2em] hover:bg-stone-900 hover:text-white transition-all duration-500 shadow-sm"
                      >
-                       Send to Workroom
+                       Commission
                      </button>
                      <button 
                        onClick={() => !hasAnyInMode && handleGenerate360(style)}
-                       className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${hasAnyInMode ? 'bg-stone-50 text-stone-300' : 'bg-stone-900 text-white hover:scale-105 shadow-lg'}`}
+                       className={`flex-1 sm:flex-none px-10 py-5 rounded-[2rem] text-[9px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${hasAnyInMode ? 'bg-stone-50 text-stone-200 cursor-default' : 'bg-stone-900 text-white hover:bg-stone-800 hover:shadow-2xl hover:shadow-stone-200 active:scale-95'}`}
                      >
-                       {hasAnyInMode ? 'Design Active' : 'Visualize'}
+                       {hasAnyInMode ? 'Generated' : 'Visualize'}
                      </button>
                    </div>
                 </div>

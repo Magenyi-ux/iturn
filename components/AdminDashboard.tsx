@@ -80,15 +80,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ inventory, onUpdateInve
   };
 
   return (
-    <div className="space-y-12 animate-in fade-in duration-700">
-      <div className="flex justify-between items-end border-b border-stone-200 pb-8">
-        <div>
-          <h2 className="text-4xl font-serif font-bold">Atelier Database</h2>
-          <p className="text-stone-500 mt-2">Manage materials, tools, and garment addons.</p>
+    <div className="max-w-6xl mx-auto space-y-16 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-stone-100 pb-12">
+        <div className="space-y-4">
+          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-300">Inventory Management</span>
+          <h2 className="text-5xl md:text-6xl font-serif font-bold text-stone-900 tracking-tight">Atelier Database</h2>
+          <p className="text-stone-400 font-medium text-sm md:text-base leading-relaxed">System-wide management for materials, precision tools, and garment hardware.</p>
         </div>
         <button 
           onClick={() => setIsAdding(true)}
-          className="px-8 py-3 bg-stone-900 text-white rounded-full text-xs font-black uppercase tracking-widest hover:bg-stone-800 transition-all shadow-xl"
+          className="w-full md:w-auto px-12 py-5 bg-stone-900 text-white rounded-[2rem] text-[10px] font-black uppercase tracking-[0.2em] hover:bg-stone-800 hover:shadow-2xl transition-all active:scale-[0.98] shadow-xl shadow-stone-100"
         >
           Add New Item
         </button>
@@ -212,44 +213,49 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ inventory, onUpdateInve
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         {['Material', 'Tool', 'Addon'].map(cat => (
-          <div key={cat} className="space-y-6">
-            <div className="flex items-center gap-4">
-               <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-stone-400">{cat}s</h3>
-               <div className="h-px flex-1 bg-stone-100"></div>
+          <div key={cat} className="space-y-8">
+            <div className="flex items-center justify-between border-b border-stone-100 pb-4">
+               <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-1.5 rounded-full bg-stone-900"></div>
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-900">{cat}s</h3>
+               </div>
+               <span className="text-[9px] font-black text-stone-300 uppercase tracking-widest">
+                  {inventory.filter(i => i.category === cat).length} Units
+               </span>
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-6">
               {inventory.filter(i => i.category === cat).map(item => (
-                <div key={item.id} className="bg-white p-6 rounded-[2.5rem] border border-stone-100 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden">
-                   <div className="flex items-center gap-4">
+                <div key={item.id} className="bg-white p-8 rounded-[3rem] border border-stone-50 shadow-sm hover:shadow-[0_20px_50px_rgba(0,0,0,0.04)] hover:border-stone-200 transition-all duration-700 group relative overflow-hidden">
+                   <div className="flex items-center gap-5">
                       {item.imageUrl && (
-                        <div className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 border border-stone-100">
+                        <div className="w-16 h-16 rounded-3xl overflow-hidden flex-shrink-0 border border-stone-50 shadow-sm transition-transform duration-500 group-hover:scale-105">
                           <img src={item.imageUrl} className="w-full h-full object-cover" alt={item.name} />
                         </div>
                       )}
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-serif font-bold text-stone-800 text-lg truncate">{item.name}</h4>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-stone-400 mt-1">
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <h4 className="font-serif font-bold text-stone-900 text-xl truncate tracking-tight">{item.name}</h4>
+                        <p className="text-[9px] font-black uppercase tracking-widest text-stone-300">
                           ${item.unitCost} / unit
                         </p>
                       </div>
                       <button 
                         onClick={() => onDeleteItem(item.id)}
-                        className="p-2 text-stone-200 hover:text-red-500 transition-all"
+                        className="p-3 text-stone-100 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all active:scale-90"
                       >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>
                       </button>
                    </div>
-                   <div className="mt-4 pt-4 border-t border-stone-50 flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-1.5 h-1.5 rounded-full ${item.stock < 10 ? 'bg-amber-400 animate-pulse' : 'bg-green-400'}`}></div>
-                        <span className="text-[9px] font-black uppercase tracking-tighter text-stone-400">Stock: {item.stock} Units</span>
+                   <div className="mt-6 pt-6 border-t border-stone-50 flex justify-between items-center">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-2 h-2 rounded-full ${item.stock < 10 ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`}></div>
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-stone-400">Inventory: {item.stock}</span>
                       </div>
-                      <span className="text-[8px] font-black uppercase tracking-widest text-stone-200">ID: {item.id.toUpperCase()}</span>
+                      <span className="text-[8px] font-black uppercase tracking-[0.3em] text-stone-200">REF: {item.id.toUpperCase()}</span>
                    </div>
                 </div>
               ))}

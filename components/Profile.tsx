@@ -12,21 +12,25 @@ const Profile: React.FC<ProfileProps> = ({ state, user, onNavigate }) => {
   const [showPaywall, setShowPaywall] = useState(false);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="flex justify-between items-end border-b border-stone-200 pb-8">
-        <div>
-          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">Atelier Account</span>
-          <h2 className="text-5xl font-serif font-bold text-stone-900 mt-2">Executive Profile</h2>
+    <div className="max-w-6xl mx-auto space-y-16 animate-in fade-in slide-in-from-bottom-6 duration-1000">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-stone-100 pb-12">
+        <div className="space-y-2">
+          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-300">Account Architecture</span>
+          <h2 className="text-5xl md:text-6xl font-serif font-bold text-stone-900 tracking-tight">Executive Profile</h2>
         </div>
-        <div className="text-right">
-          <p className="text-sm font-bold text-stone-900">{user.email}</p>
-          <p className="text-[10px] text-stone-400 uppercase tracking-widest mt-1">ID: {user.id.slice(0, 8).toUpperCase()}</p>
+        <div className="bg-white px-8 py-4 rounded-3xl border border-stone-100 shadow-sm flex items-center gap-4 self-start md:self-auto">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+          <div>
+            <p className="text-xs font-bold text-stone-900">{user.email}</p>
+            <p className="text-[9px] text-stone-400 font-black uppercase tracking-[0.2em] mt-0.5">{user.id.slice(0, 8).toUpperCase()}</p>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* Storage Card */}
-        <div className="md:col-span-1 bg-white rounded-[3rem] p-10 border border-stone-100 shadow-sm space-y-8">
+        <div className="lg:col-span-1 bg-white rounded-[4rem] p-12 border border-stone-100 shadow-sm space-y-10 group overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-stone-50 rounded-full -mr-16 -mt-16 group-hover:bg-stone-100 transition-colors"></div>
           <div className="space-y-2">
             <h3 className="text-xs font-black uppercase tracking-widest text-stone-900">Cloud Storage</h3>
             <p className="text-[10px] text-stone-400 uppercase tracking-[0.2em]">Synchronized Architecture</p>
@@ -54,25 +58,23 @@ const Profile: React.FC<ProfileProps> = ({ state, user, onNavigate }) => {
         </div>
 
         {/* Activity Statistics */}
-        <div className="md:col-span-2 bg-stone-900 rounded-[3rem] p-10 text-white flex flex-col justify-between relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 transition-all duration-1000 group-hover:bg-white/10"></div>
+        <div className="lg:col-span-2 bg-stone-900 rounded-[4rem] p-12 text-white flex flex-col justify-between relative overflow-hidden group shadow-2xl shadow-stone-200">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full -mr-40 -mt-40 transition-all duration-1000 group-hover:bg-white/10"></div>
 
-          <div className="grid grid-cols-3 gap-8 relative z-10">
-            <div className="space-y-1">
-              <p className="text-4xl font-serif font-bold">{state.orders.length}</p>
-              <p className="text-[9px] font-black uppercase tracking-widest text-stone-500">Active Orders</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-4xl font-serif font-bold">{state.savedInspirations.length}</p>
-              <p className="text-[9px] font-black uppercase tracking-widest text-stone-500">Saved Hubs</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-4xl font-serif font-bold">{state.clients.length}</p>
-              <p className="text-[9px] font-black uppercase tracking-widest text-stone-500">Linked Clients</p>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-12 relative z-10">
+            {[
+              { label: 'Active Orders', value: state.orders.length },
+              { label: 'Saved Hubs', value: state.savedInspirations.length },
+              { label: 'Linked Clients', value: state.clients.length }
+            ].map((stat, i) => (
+              <div key={i} className="space-y-2">
+                <p className="text-6xl font-serif font-bold tracking-tight">{stat.value}</p>
+                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-stone-500">{stat.label}</p>
+              </div>
+            ))}
           </div>
 
-          <div className="pt-8 border-t border-stone-800 flex justify-between items-center relative z-10">
+          <div className="pt-12 mt-12 border-t border-stone-800 flex flex-col sm:flex-row justify-between items-center gap-6 relative z-10">
              <div>
                 <p className="text-xs font-bold text-stone-300 tracking-wide">Subscription Status</p>
                 <p className="text-[10px] uppercase tracking-[0.3em] text-stone-500 mt-1 font-black">Standard Tier</p>

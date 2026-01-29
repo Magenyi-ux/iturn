@@ -29,15 +29,16 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onPhotosComplete }) => {
   const isComplete = Object.keys(photos).length === 3;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-16 animate-in fade-in duration-1000">
-      <div className="text-center space-y-4">
-        <h2 className="text-6xl font-serif font-bold tracking-tight text-stone-900">Anatomic Capture</h2>
-        <p className="text-stone-400 font-serif italic text-xl max-w-2xl mx-auto">
-          "Import high-resolution captures of the client for precise measurement synthesis and drape analysis."
+    <div className="max-w-6xl mx-auto space-y-20 animate-in fade-in slide-in-from-bottom-8 duration-1000 pb-20">
+      <div className="text-center space-y-6">
+        <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-300">Biometric Intake</span>
+        <h2 className="text-6xl md:text-8xl font-serif font-bold tracking-tighter text-stone-900 leading-none">Anatomic Capture</h2>
+        <p className="text-stone-400 font-serif italic text-lg md:text-2xl max-w-2xl mx-auto leading-relaxed">
+          "High-resolution silhouettes are required for precise neural measurement synthesis."
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
         {slots.map((slot) => (
           <div key={slot.id} className="space-y-6">
             <label className="block group cursor-pointer">
@@ -47,10 +48,10 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onPhotosComplete }) => {
                 accept="image/*" 
                 onChange={(e) => handleFileImport(slot.id, e)} 
               />
-              <div className={`relative aspect-[3/4] rounded-[3rem] border-2 border-dashed transition-all duration-500 overflow-hidden flex flex-col items-center justify-center p-8 text-center ${
+              <div className={`relative aspect-[3/4.5] rounded-[4rem] border-2 border-dashed transition-all duration-700 overflow-hidden flex flex-col items-center justify-center p-10 text-center ${
                 photos[slot.id] 
-                  ? 'border-stone-900 bg-stone-50 shadow-inner' 
-                  : 'border-stone-200 bg-white hover:border-stone-400 hover:shadow-2xl hover:-translate-y-2'
+                  ? 'border-stone-900 bg-stone-50 shadow-[0_20px_50px_rgba(0,0,0,0.02)]'
+                  : 'border-stone-100 bg-white hover:border-stone-900 hover:shadow-[0_40px_80px_rgba(0,0,0,0.06)] hover:-translate-y-2'
               }`}>
                 {photos[slot.id] ? (
                   <>
@@ -82,27 +83,28 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onPhotosComplete }) => {
         ))}
       </div>
 
-      <div className="flex flex-col items-center pt-8 space-y-8">
-        <div className="flex items-center gap-4 text-stone-300">
-          <div className={`h-px w-24 bg-current transition-colors ${isComplete ? 'text-stone-900' : ''}`} />
-          <span className={`text-[10px] font-black uppercase tracking-[0.5em] transition-colors ${isComplete ? 'text-stone-900' : ''}`}>
-            {isComplete ? 'Profile Ready' : 'Awaiting Full Set'}
+      <div className="flex flex-col items-center pt-12 space-y-10">
+        <div className="flex items-center gap-6 text-stone-200">
+          <div className={`h-px w-32 bg-current transition-colors duration-1000 ${isComplete ? 'text-emerald-500' : ''}`} />
+          <span className={`text-[9px] font-black uppercase tracking-[0.6em] transition-colors duration-1000 flex items-center gap-3 ${isComplete ? 'text-emerald-500' : ''}`}>
+            {isComplete && <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>}
+            {isComplete ? 'Set Verified' : 'Awaiting Data'}
           </span>
-          <div className={`h-px w-24 bg-current transition-colors ${isComplete ? 'text-stone-900' : ''}`} />
+          <div className={`h-px w-32 bg-current transition-colors duration-1000 ${isComplete ? 'text-emerald-500' : ''}`} />
         </div>
 
         <button 
           onClick={() => isComplete && onPhotosComplete(photos)}
           disabled={!isComplete}
-          className={`group px-24 py-7 rounded-full font-serif font-bold text-2xl transition-all shadow-2xl flex items-center gap-6 active:scale-95 ${
+          className={`group px-20 py-8 rounded-[2.5rem] font-serif font-bold text-3xl transition-all duration-700 shadow-2xl flex items-center gap-8 active:scale-[0.98] ${
             isComplete 
-              ? 'bg-stone-900 text-stone-50 hover:bg-stone-800' 
-              : 'bg-stone-100 text-stone-300 cursor-not-allowed border border-stone-200'
+              ? 'bg-stone-900 text-white hover:bg-stone-800 hover:shadow-stone-200'
+              : 'bg-stone-50 text-stone-200 cursor-not-allowed border border-stone-100'
           }`}
         >
-          Proceed to Measurement
-          <svg className={`w-6 h-6 transform transition-transform ${isComplete ? 'group-hover:translate-x-2' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          Initialize Analysis
+          <svg className={`w-8 h-8 transform transition-transform duration-500 ${isComplete ? 'group-hover:translate-x-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
           </svg>
         </button>
       </div>

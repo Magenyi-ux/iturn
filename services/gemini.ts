@@ -45,7 +45,7 @@ export const generateDesignDNA = async (frontViewImage: string, style: StyleConc
     const ai = new GoogleGenAI();
     const img = await standardizeImage(frontViewImage, 768);
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-1.5-flash',
       contents: {
         parts: [
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(img) } },
@@ -72,7 +72,7 @@ export const searchInspiration = async (query: string): Promise<{ text: string, 
     // API key is implicitly provided by the AI Studio environment.
     const ai = new GoogleGenAI();
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-1.5-flash',
       contents: `SYSTEM: Search for high-end fashion design, textile patterns, couture silhouettes, and bespoke tailoring elements. Provide a deep aesthetic synthesis of the trend.
       USER INSTRUCTIONS: ${query}`,
       config: {
@@ -94,7 +94,7 @@ export const generateMoodImages = async (description: string): Promise<string[]>
     const results: string[] = [];
     for (const aspect of aspects) {
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash-image',
+        model: 'gemini-1.5-flash',
         contents: `SYSTEM: A high-fashion editorial mood board image capturing the requested essence. Focus on fabric texture, avant-garde silhouette, or couture craftsmanship detail. Professional studio lighting, hyper-realistic, 8k resolution.
         USER INSTRUCTIONS: ${description}`,
         config: { imageConfig: { aspectRatio: aspect } }
@@ -113,7 +113,7 @@ export const refineDesign = async (baseImage: string, sketchOverlay: string, ins
     const base = await standardizeImage(baseImage, 512);
     const sketch = await standardizeImage(sketchOverlay, 512);
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
+      model: 'gemini-1.5-flash',
       contents: {
         parts: [
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(base) } },
@@ -134,7 +134,7 @@ export const generatePattern = async (style: StyleConcept, measurements: Measure
     // API key is implicitly provided by the AI Studio environment.
     const ai = new GoogleGenAI();
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-1.5-flash',
       contents: `Create a detailed technical pattern description for "${style.title}". Provide specific cutting coordinates, seam allowances, and assembly order based on these measurements: ${JSON.stringify(measurements)}. Return a professional garment drafting guide.`
     });
     return response.text || "Pattern generation error.";
@@ -147,7 +147,7 @@ export const analyzeFabric = async (imageUrl: string): Promise<string> => {
     const ai = new GoogleGenAI();
     const img = await standardizeImage(imageUrl, 512);
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-1.5-flash',
       contents: {
         parts: [
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(img) } },
@@ -169,7 +169,7 @@ export const predictMeasurements = async (photos: Record<string, string>) => {
       back: await standardizeImage(photos.back),
     };
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-1.5-flash',
       contents: {
         parts: [
           { text: "Analyze these silhouette captures for body proportions to inform bespoke garment construction. Return precise tailoring measurements in cm." },
@@ -211,7 +211,7 @@ export const generateStyles = async (measurements: Measurements, photos: Record<
     const ai = new GoogleGenAI();
     const img = await standardizeImage(photos.front, 512);
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-1.5-flash',
       contents: {
         parts: [
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(img) } },
@@ -287,7 +287,7 @@ export const generateStyleImage = async (
     parts.push({ text: prompt });
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-image-preview',
+      model: 'gemini-1.5-pro',
       contents: { parts },
       config: { imageConfig: { aspectRatio: "3:4" } }
     });

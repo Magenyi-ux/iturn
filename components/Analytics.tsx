@@ -7,7 +7,7 @@ interface AnalyticsProps {
 }
 
 const Analytics: React.FC<AnalyticsProps> = ({ state }) => {
-  const totalRevenue = state.orders.reduce((acc, o) => acc + o.price, 0);
+  const totalRevenue = state.orders.reduce((acc, o) => acc + o.totalPrice, 0);
   const activeProjects = state.orders.filter(o => o.status !== 'Delivered').length;
   
   const categoryStats = state.styleConcepts.reduce((acc: Record<string, number>, curr) => {
@@ -16,40 +16,33 @@ const Analytics: React.FC<AnalyticsProps> = ({ state }) => {
   }, {});
 
   return (
-    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="flex justify-between items-end border-b border-stone-100 pb-8">
-        <div>
-          <h2 className="text-4xl font-serif font-bold">Atelier Analytics</h2>
-          <p className="text-stone-500 mt-2">Intelligence report for workshop performance.</p>
+    <div className="max-w-6xl mx-auto space-y-16 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-stone-100 pb-12">
+        <div className="space-y-4">
+          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-300">Operations Intelligence</span>
+          <h2 className="text-5xl md:text-6xl font-serif font-bold text-stone-900 tracking-tight">Atelier Analytics</h2>
+          <p className="text-stone-400 font-medium text-sm md:text-base leading-relaxed">Intelligence report for workshop output and fiscal performance.</p>
         </div>
-        <div className="text-right">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-300">Quarterly Output</p>
-          <p className="text-2xl font-serif font-bold text-stone-900">FY 2025</p>
+        <div className="bg-white px-8 py-5 rounded-[2rem] border border-stone-100 shadow-sm self-start md:self-auto group hover:border-stone-200 transition-all">
+          <p className="text-[9px] font-black uppercase tracking-[0.4em] text-stone-300 mb-1 group-hover:text-stone-400 transition-colors">Quarterly Output</p>
+          <p className="text-2xl font-serif font-bold text-stone-900 tracking-tight">FY 2025</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm">
-          <p className="text-[10px] font-black uppercase tracking-widest text-stone-400 mb-2">Total Yield</p>
-          <div className="flex items-end gap-2">
-            <h4 className="text-4xl font-serif font-bold text-stone-900">${totalRevenue.toLocaleString()}</h4>
-            <span className="text-green-500 text-xs font-bold mb-1">+12%</span>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+        {[
+          { label: 'Total Yield', value: `$${totalRevenue.toLocaleString()}`, trend: '+12%', trendColor: 'text-emerald-500' },
+          { label: 'Workroom Load', value: activeProjects, trend: 'Active', trendColor: 'text-stone-300' },
+          { label: 'Efficiency', value: '94%', trend: 'Optimum', trendColor: 'text-emerald-500' }
+        ].map((stat, i) => (
+          <div key={i} className="bg-white p-10 rounded-[3rem] border border-stone-100 shadow-sm group hover:shadow-2xl hover:shadow-stone-100 transition-all duration-700">
+            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-stone-300 mb-4">{stat.label}</p>
+            <div className="flex items-end justify-between">
+              <h4 className="text-5xl font-serif font-bold text-stone-900 tracking-tighter">{stat.value}</h4>
+              <span className={`text-[10px] font-black uppercase tracking-widest mb-1 px-3 py-1 rounded-full bg-stone-50 border border-stone-100 ${stat.trendColor}`}>{stat.trend}</span>
+            </div>
           </div>
-        </div>
-        <div className="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm">
-          <p className="text-[10px] font-black uppercase tracking-widest text-stone-400 mb-2">Workroom Load</p>
-          <div className="flex items-end gap-2">
-            <h4 className="text-4xl font-serif font-bold text-stone-900">{activeProjects}</h4>
-            <span className="text-stone-300 text-xs font-bold mb-1">Active Projects</span>
-          </div>
-        </div>
-        <div className="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm">
-          <p className="text-[10px] font-black uppercase tracking-widest text-stone-400 mb-2">Efficiency</p>
-          <div className="flex items-end gap-2">
-            <h4 className="text-4xl font-serif font-bold text-stone-900">94%</h4>
-            <span className="text-stone-300 text-xs font-bold mb-1">Couture Standard</span>
-          </div>
-        </div>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">

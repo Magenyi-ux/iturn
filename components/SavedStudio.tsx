@@ -12,22 +12,24 @@ const SavedStudio: React.FC<SavedStudioProps> = ({ inspirations, onAction }) => 
 
   if (inspirations.length === 0) {
     return (
-      <div className="h-[70vh] flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-700">
-        <div className="w-24 h-24 rounded-full bg-stone-100 flex items-center justify-center text-stone-300">
-           <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+      <div className="h-[70vh] flex flex-col items-center justify-center space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+        <div className="w-32 h-32 rounded-[2.5rem] bg-stone-50 border border-stone-100 flex items-center justify-center text-stone-200 shadow-inner">
+           <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
            </svg>
         </div>
-        <div className="text-center space-y-2">
-          <h3 className="text-3xl font-serif font-bold text-stone-900">Archive Empty</h3>
-          <p className="text-stone-400 italic font-serif">"Save your research in the Inspiration Hub to build your atelier's visual legacy."</p>
+        <div className="text-center space-y-4 max-w-sm">
+          <h3 className="text-4xl font-serif font-bold text-stone-900 tracking-tight">Vault Depleted</h3>
+          <p className="text-stone-400 font-medium text-sm leading-relaxed">
+            Curate your digital library by archiving insights from the Inspiration Hub.
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-16 pb-32 animate-in fade-in duration-700">
+    <div className="max-w-7xl mx-auto space-y-16 pb-32 animate-in fade-in slide-in-from-bottom-6 duration-1000">
       {/* Lightbox */}
       {maximizedImage && (
         <div 
@@ -42,14 +44,20 @@ const SavedStudio: React.FC<SavedStudioProps> = ({ inspirations, onAction }) => 
         </div>
       )}
 
-      <div className="flex justify-between items-end border-b border-stone-100 pb-8">
-        <div className="space-y-2">
-          <h2 className="text-5xl font-serif font-bold text-stone-900">The Atelier Archive</h2>
-          <p className="text-stone-400 font-serif italic text-lg">"Your digital library of aesthetic brilliance."</p>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-stone-100 pb-12">
+        <div className="space-y-3">
+          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-300">Legacy Data</span>
+          <h2 className="text-5xl md:text-6xl font-serif font-bold text-stone-900 tracking-tight">The Atelier Archive</h2>
+          <p className="text-stone-400 font-serif italic text-lg md:text-2xl leading-relaxed">"Your digital library of aesthetic brilliance."</p>
         </div>
-        <div className="text-right">
-           <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-300">Total Entries</span>
-           <p className="text-2xl font-serif font-bold">{inspirations.length}</p>
+        <div className="bg-white px-8 py-5 rounded-[2rem] border border-stone-100 shadow-sm flex items-center gap-6 self-start md:self-auto group hover:border-stone-200 transition-all">
+           <div>
+              <p className="text-[9px] font-black uppercase tracking-[0.4em] text-stone-300 mb-1">Manifest</p>
+              <p className="text-2xl font-serif font-bold text-stone-900 tracking-tight">{inspirations.length} Entries</p>
+           </div>
+           <div className="w-10 h-10 rounded-2xl bg-stone-50 flex items-center justify-center text-stone-300 group-hover:bg-stone-900 group-hover:text-white transition-all duration-500">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" strokeWidth="2"/></svg>
+           </div>
         </div>
       </div>
 
