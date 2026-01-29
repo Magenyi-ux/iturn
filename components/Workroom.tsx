@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Order, Client, StyleConcept } from '../types';
-import { ChevronRight, Clock, DollarSign, ExternalLink } from 'lucide-react';
+import { ChevronRight, Clock, DollarSign, ExternalLink, Briefcase } from 'lucide-react';
 
 interface WorkroomProps {
   orders: Order[];
