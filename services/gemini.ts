@@ -70,6 +70,19 @@ async function standardizeImage(dataUrl: string, maxDimension: number = 1024): P
 const extractBase64 = (url: string) => url.split(',')[1];
 
 /**
+ * Sanitizes user input to prevent prompt injection.
+ * Escapes quotes, removes system markers, and enforces length limits.
+ */
+export const sanitizePromptInput = (input: string, maxLength: number = 500): string => {
+  if (!input) return "";
+  return input
+    .slice(0, maxLength)
+    .replace(/"/g, '\\"')
+    .replace(/SYSTEM:|USER INSTRUCTIONS:|IGNORE PREVIOUS|Ignore previous instructions/gi, "")
+    .trim();
+};
+
+/**
  * Generates a "Design DNA" blueprint.
  */
 export const generateDesignDNA = async (frontViewImage: string, style: StyleConcept): Promise<string> => {
@@ -89,9 +102,8 @@ export const generateDesignDNA = async (frontViewImage: string, style: StyleConc
           2. COLOR SPECIFICATIONS: Precise hex-logic, highlight behaviors, and shadow tints.
           3. COMPONENT HEIGHTS: Exact pixel-relative coordinates for the waistline, neckline, and hemlines.
           4. HARDWARE LOG: Detailed count, shape, and material of buttons, zippers, and rivets.
-          5. SEAM ARCHITECTURE: Placement of darts, top-stitching, and panel joins.
-
-USER INSTRUCTIONS: Extract Design DNA for "${style.title}".` }
+          5. SEAM ARCHITECTURE: Placement of darts, top-stitching, and panel joins.` },
+          { text: `USER INSTRUCTIONS: Extract Design DNA for "${sanitizePromptInput(style.title)}".` }
         ]
       }
     });
@@ -109,9 +121,12 @@ export const searchInspiration = async (query: string): Promise<{ text: string, 
     const ai = new GoogleGenAI();
     const response = await ai.models.generateContent({
       model: 'gemini-1.5-flash',
-      contents: `SYSTEM: Search for high-end fashion design related to the user query. Provide a deep aesthetic synthesis.
-
-USER INSTRUCTIONS: Query: "${query}"`,
+      contents: {
+        parts: [
+          { text: "SYSTEM: Search for high-end fashion design related to the user query. Provide a deep aesthetic synthesis." },
+          { text: `USER INSTRUCTIONS: Query: "${sanitizePromptInput(query)}"` }
+        ]
+      },
       config: {
         tools: [{ googleSearch: {} }]
       }
@@ -131,9 +146,12 @@ export const generateMoodImages = async (description: string): Promise<string[]>
     for (const aspect of aspects) {
       const response = await ai.models.generateContent({
         model: 'gemini-1.5-flash',
-        contents: `SYSTEM: A high-fashion mood board image. Studio lighting, hyper-realistic.
-
-USER INSTRUCTIONS: Theme: "${description}". Aspect ratio: ${aspect}.`,
+        contents: {
+          parts: [
+            { text: "SYSTEM: A high-fashion mood board image. Studio lighting, hyper-realistic." },
+            { text: `USER INSTRUCTIONS: Theme: "${sanitizePromptInput(description)}". Aspect ratio: ${aspect}.` }
+          ]
+        },
         config: { imageConfig: { aspectRatio: aspect } }
       });
       const part = response.candidates?.[0]?.content?.parts.find(p => p.inlineData);
@@ -154,9 +172,8 @@ export const refineDesign = async (baseImage: string, sketchOverlay: string, ins
         parts: [
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(base) } },
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(sketch) } },
-          { text: `SYSTEM: Refine the garment shown in the images. Output editorial photography.
-
-USER INSTRUCTIONS: ${instructions}` }
+          { text: "SYSTEM: Refine the garment shown in the images. Output editorial photography." },
+          { text: `USER INSTRUCTIONS: ${sanitizePromptInput(instructions)}` }
         ]
       },
       config: { imageConfig: { aspectRatio: "3:4" } }
@@ -181,9 +198,12 @@ export const generatePattern = async (style: StyleConcept, measurements: Measure
     const ai = new GoogleGenAI();
     const response = await ai.models.generateContent({
       model: 'gemini-1.5-flash',
-      contents: `SYSTEM: Create a professional technical pattern description based on provided style and measurements.
-
-USER INSTRUCTIONS: Style: "${style.title}". Measurements: ${JSON.stringify(measurements)}.`
+      contents: {
+        parts: [
+          { text: "SYSTEM: Create a professional technical pattern description based on provided style and measurements." },
+          { text: `USER INSTRUCTIONS: Style: "${sanitizePromptInput(style.title)}". Measurements: ${JSON.stringify(measurements)}.` }
+        ]
+      }
     });
     return response.text || "Pattern generation error.";
   });
@@ -268,9 +288,8 @@ export const generateStyles = async (measurements: Measurements, photos: Record<
       contents: {
         parts: [
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(img) } },
-          { text: `SYSTEM: Create 30 visionary couture concepts. Proportions: ${JSON.stringify(measurements)}.
-
-USER INSTRUCTIONS: Suggestion: "${suggestion}". Generate concepts based on the provided photo and proportions.` }
+          { text: `SYSTEM: Create 30 visionary couture concepts. Proportions: ${JSON.stringify(measurements)}.` },
+          { text: `USER INSTRUCTIONS: Suggestion: "${sanitizePromptInput(suggestion)}". Generate concepts based on the provided photo and proportions.` }
         ]
       },
       config: {
@@ -314,13 +333,12 @@ export const generateStyleImage = async (
     if (designReferenceImage && designDNA) {
       const designRef = await standardizeImage(designReferenceImage, 768);
       parts.push({ inlineData: { mimeType: 'image/jpeg', data: extractBase64(designRef) } });
-      architecturalDirective = `Render ${angle} view using the hidden 'SECRET DESIGN DNA' blueprint: ${designDNA}`;
+      architecturalDirective = `Render ${sanitizePromptInput(angle)} view using the hidden 'SECRET DESIGN DNA' blueprint: ${designDNA}`;
     }
 
-    const prompt = `SYSTEM: Hyper-realistic 8k fashion photography. Mode: ${mode}. Studio lighting. ${architecturalDirective}
-
-USER INSTRUCTIONS: View: ${angle}. Style: "${style.title}".`;
+    const prompt = `SYSTEM: Hyper-realistic 8k fashion photography. Mode: ${sanitizePromptInput(mode)}. Studio lighting. ${architecturalDirective}`;
     parts.push({ text: prompt });
+    parts.push({ text: `USER INSTRUCTIONS: View: ${sanitizePromptInput(angle)}. Style: "${sanitizePromptInput(style.title)}".` });
 
     const response = await ai.models.generateContent({
       model: 'gemini-1.5-pro',
