@@ -103,7 +103,7 @@ const LiveWorkshop: React.FC<LiveWorkshopProps> = ({ concepts, orders }) => {
     setIsConnecting(true);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI();
       
       inputAudioCtx.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
       outputAudioCtx.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
@@ -114,7 +114,7 @@ const LiveWorkshop: React.FC<LiveWorkshopProps> = ({ concepts, orders }) => {
       }
 
       const sessionPromise = ai.live.connect({
-        model: 'gemini-2.5-flash-native-audio-preview-12-2025',
+        model: 'gemini-1.5-flash',
         config: {
           responseModalities: [Modality.AUDIO],
           inputAudioTranscription: {},
@@ -122,7 +122,7 @@ const LiveWorkshop: React.FC<LiveWorkshopProps> = ({ concepts, orders }) => {
           speechConfig: {
             voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Puck' } },
           },
-          systemInstruction: `You are the "Master Tutor" on a live video call with a tailor.
+          systemInstruction: `SYSTEM: You are the "Master Tutor" on a live video call with a tailor.
           Active Style: "${activeStyle.title}".
           Technical Construction Steps: ${activeStyle.steps.join('; ')}.
           
@@ -137,7 +137,9 @@ const LiveWorkshop: React.FC<LiveWorkshopProps> = ({ concepts, orders }) => {
           
           CURRENT CONTEXT:
           - The tailor is currently at Step ${currentStepIdx + 1}. 
-          - Be encouraging yet strictly technical and concise.`,
+          - Be encouraging yet strictly technical and concise.
+
+USER INSTRUCTIONS: Please provide live technical assistance for the current construction phase.`,
         },
         callbacks: {
           onopen: () => {
