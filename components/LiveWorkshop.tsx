@@ -60,6 +60,8 @@ const LiveWorkshop: React.FC<LiveWorkshopProps> = ({ concepts, orders }) => {
   const [isActive, setIsActive] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isFlashActive, setIsFlashActive] = useState(false);
+  const [mirrorActive, setMirrorActive] = useState(false);
+  const [mirrorOpacity, setMirrorOpacity] = useState(0.5);
   const [callDuration, setCallDuration] = useState(0);
   const [transcriptions, setTranscriptions] = useState<{ user: string; ai: string }>({ user: '', ai: '' });
   const [diagnostics, setDiagnostics] = useState<DiagnosticEntry[]>([]);
@@ -123,24 +125,24 @@ const LiveWorkshop: React.FC<LiveWorkshopProps> = ({ concepts, orders }) => {
           speechConfig: {
             voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Puck' } },
           },
-          systemInstruction: `SYSTEM: You are the "Master Tutor" on a live video call with a tailor.
+          systemInstruction: `SYSTEM: You are the "Imperial Master Tutor" on a high-fidelity video link with a master tailor.
           Active Style: "${activeStyle.title}".
           Technical Construction Steps: ${activeStyle.steps.join('; ')}.
           
           MISSION:
-          - Provide hands-free guidance for the current construction phase.
-          - Identify potential errors in fabric handling, grain line alignment, or stitch tension.
-          - Offer specific "Tailor's Advice" on what to do and what to avoid.
+          - Provide clinical, high-end technical guidance for the current phase.
+          - Detect textile alignment, grain integrity, and seam precision in the video feed.
+          - If the user has "Mirror Mode" active, you are "seeing" your own digital design projected onto their physical fabric—provide advice on how to align reality with that projection.
           
-          VOICE COMMANDS YOU MUST RECOGNIZE:
-          - "SNAP": Respond by saying "Analyzing capture..." and then provide a technical critique of the visual frame.
-          - "NEXT": Move your focus to the next construction step in the sequence.
+          VOICE COMMANDS TO MONITOR:
+          - "SNAP": Trigger a visual analysis of the current frame.
+          - "NEXT": Advance the construction workflow context to the next phase.
           
           CURRENT CONTEXT:
-          - The tailor is currently at Step ${currentStepIdx + 1}. 
-          - Be encouraging yet strictly technical and concise.
+          - Construction Phase: Step ${currentStepIdx + 1}.
+          - Atmosphere: Professional, Royal, Precise.
 
-USER INSTRUCTIONS: Please provide live technical assistance for the current construction phase.`,
+USER INSTRUCTIONS: Provide technical oversight for the atelier workshop session.`,
         },
         callbacks: {
           onopen: () => {
@@ -204,9 +206,28 @@ USER INSTRUCTIONS: Please provide live technical assistance for the current cons
             if (msg.serverContent?.inputTranscription) {
                const text = msg.serverContent.inputTranscription.text.toLowerCase();
                setTranscriptions(prev => ({ ...prev, user: text }));
-               if (text.includes('snap')) triggerFlash();
+
+               if (text.includes('snap')) {
+                 triggerFlash();
+                 setDiagnostics(prev => [{
+                    timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                    message: "Imperial Scan Triggered: Analyzing silhouettes...",
+                    type: 'General'
+                 }, ...prev]);
+               }
+
                if (text.includes('next')) {
-                 setCurrentStepIdx(prev => Math.min(prev + 1, activeStyle.steps.length - 1));
+                 setCurrentStepIdx(prev => {
+                    const nextIdx = Math.min(prev + 1, activeStyle.steps.length - 1);
+                    if (nextIdx !== prev) {
+                        setDiagnostics(prevLog => [{
+                           timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                           message: "Workflow Advanced: Now monitoring Step " + (nextIdx + 1),
+                           type: 'General'
+                        }, ...prevLog]);
+                    }
+                    return nextIdx;
+                 });
                }
             }
             if (msg.serverContent?.outputTranscription) {
@@ -306,6 +327,22 @@ USER INSTRUCTIONS: Please provide live technical assistance for the current cons
           {/* Main Visual Workspace */}
           <div className="flex-1 relative bg-black overflow-hidden h-[60vh] md:h-full">
             <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+
+            {/* Imperial Mirror Overlay */}
+            {mirrorActive && activeStyle?.refinements && activeStyle.refinements.length > 0 && (
+              <div
+                className="absolute inset-0 z-10 transition-opacity duration-500 pointer-events-none"
+                style={{ opacity: mirrorOpacity }}
+              >
+                <img
+                  src={activeStyle.refinements[activeStyle.refinements.length - 1]}
+                  className="w-full h-full object-contain mix-blend-screen"
+                  alt="Digital Projection"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-primary)]/20 to-transparent" />
+              </div>
+            )}
+
             <canvas ref={canvasRef} className="hidden" />
             
             {/* Master HUD: Technical Grid */}
@@ -314,6 +351,9 @@ USER INSTRUCTIONS: Please provide live technical assistance for the current cons
                <div className="absolute top-0 bottom-0 left-1/2 w-px bg-[var(--color-secondary)]"></div>
                <div className="absolute inset-0 border-[1px] border-[var(--color-secondary)] m-12 rounded-[2rem]"></div>
             </div>
+
+            {/* Scanning Line Animation */}
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-[var(--color-secondary)] to-transparent opacity-40 shadow-[0_0_20px_var(--color-secondary)] animate-[scan_3s_linear_infinite] pointer-events-none" />
 
             {/* Flash Effect on 'Snap' */}
             {isFlashActive && <div className="absolute inset-0 bg-white z-[100] animate-out fade-out duration-500"></div>}
@@ -379,9 +419,25 @@ USER INSTRUCTIONS: Please provide live technical assistance for the current cons
                  <PhoneOff className="w-7 h-7 lg:w-8 lg:h-8" />
                </button>
 
-               <button className="w-14 h-14 lg:w-16 lg:h-16 bg-white/10 text-white rounded-full flex items-center justify-center hover:bg-white/20 transition-all shadow-xl">
-                 <Zap className="w-5 h-5 lg:w-6 lg:h-6 text-[var(--color-secondary)]" />
-               </button>
+               <div className="flex items-center gap-4 bg-white/5 px-6 py-2 rounded-full border border-white/10">
+                 <button
+                  onClick={() => setMirrorActive(!mirrorActive)}
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${mirrorActive ? 'bg-[var(--color-secondary)] text-[var(--color-primary)]' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                  title="Imperial Mirror"
+                 >
+                   <Zap className="w-5 h-5" />
+                 </button>
+
+                 {mirrorActive && (
+                   <input
+                    type="range"
+                    min="0" max="1" step="0.01"
+                    value={mirrorOpacity}
+                    onChange={(e) => setMirrorOpacity(parseFloat(e.target.value))}
+                    className="w-24 accent-[var(--color-secondary)]"
+                   />
+                 )}
+               </div>
             </div>
           </div>
 
@@ -440,5 +496,15 @@ USER INSTRUCTIONS: Please provide live technical assistance for the current cons
     </div>
   );
 };
+
+// Add scanning keyframes
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes scan {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(100vh); }
+  }
+`;
+document.head.appendChild(style);
 
 export default LiveWorkshop;
