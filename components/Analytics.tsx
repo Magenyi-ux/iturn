@@ -7,8 +7,10 @@ interface AnalyticsProps {
 }
 
 const Analytics: React.FC<AnalyticsProps> = ({ state }) => {
-  const totalRevenue = state.orders.reduce((acc, o) => acc + o.price, 0);
+  const totalRevenue = state.orders.reduce((acc, o) => acc + o.totalPrice, 0);
   const activeProjects = state.orders.filter(o => o.status !== 'Delivered').length;
+  const clientCount = state.clients.length;
+  const inspirationCount = state.savedInspirations.length;
   
   const categoryStats = state.styleConcepts.reduce((acc: Record<string, number>, curr) => {
     acc[curr.category] = (acc[curr.category] || 0) + 1;
@@ -28,7 +30,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ state }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         <div className="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm">
           <p className="text-[10px] font-black uppercase tracking-widest text-stone-400 mb-2">Total Yield</p>
           <div className="flex items-end gap-2">
@@ -44,10 +46,17 @@ const Analytics: React.FC<AnalyticsProps> = ({ state }) => {
           </div>
         </div>
         <div className="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm">
-          <p className="text-[10px] font-black uppercase tracking-widest text-stone-400 mb-2">Efficiency</p>
+          <p className="text-[10px] font-black uppercase tracking-widest text-stone-400 mb-2">Client Base</p>
           <div className="flex items-end gap-2">
-            <h4 className="text-4xl font-serif font-bold text-stone-900">94%</h4>
-            <span className="text-stone-300 text-xs font-bold mb-1">Couture Standard</span>
+            <h4 className="text-4xl font-serif font-bold text-stone-900">{clientCount}</h4>
+            <span className="text-stone-300 text-xs font-bold mb-1">Active Profiles</span>
+          </div>
+        </div>
+        <div className="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm">
+          <p className="text-[10px] font-black uppercase tracking-widest text-stone-400 mb-2">Saved Studio</p>
+          <div className="flex items-end gap-2">
+            <h4 className="text-4xl font-serif font-bold text-stone-900">{inspirationCount}</h4>
+            <span className="text-stone-300 text-xs font-bold mb-1">Inspirations</span>
           </div>
         </div>
       </div>
