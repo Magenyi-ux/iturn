@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Fabric } from '../types';
 import { analyzeFabric } from '../services/gemini';
+import { Upload, X, ShieldCheck, Microscope, Layers, ChevronRight } from 'lucide-react';
 
 interface MaterialsLibraryProps {
   fabrics: Fabric[];
@@ -63,44 +64,44 @@ const MaterialsLibrary: React.FC<MaterialsLibraryProps> = ({ fabrics, onAdd }) =
     <div className="space-y-16 pb-32 animate-in fade-in duration-700">
       {/* Technical Synthesis Report Modal */}
       {selectedFabric && (
-        <div className="fixed inset-0 z-[100] bg-stone-900/95 backdrop-blur-2xl flex items-center justify-center p-8 animate-in fade-in duration-500">
-          <div className="bg-white w-full max-w-5xl rounded-[4rem] overflow-hidden flex flex-col md:flex-row shadow-[0_50px_100px_rgba(0,0,0,0.5)] border border-white/20">
-             <div className="md:w-1/2 bg-stone-100 relative group">
-                <img src={selectedFabric.imageUrl} className="w-full h-full object-cover grayscale-[0.2] group-hover:grayscale-0 transition-all duration-1000" alt="Detail Swatch" />
-                <div className="absolute inset-0 bg-stone-900/10 pointer-events-none"></div>
+        <div className="fixed inset-0 z-[100] bg-[var(--color-primary)]/95 backdrop-blur-2xl flex items-center justify-center p-4 lg:p-8 animate-in fade-in duration-500">
+          <div className="bg-[var(--color-surface)] w-full max-w-5xl rounded-[3rem] lg:rounded-[4rem] overflow-hidden flex flex-col md:flex-row shadow-[0_50px_100px_rgba(0,0,0,0.5)] border border-white/20">
+             <div className="md:w-1/2 h-64 md:h-auto bg-[var(--color-background)] relative group">
+                <img src={selectedFabric.imageUrl} className="w-full h-full object-cover transition-all duration-[2000ms] group-hover:scale-110" alt="Detail Swatch" />
+                <div className="absolute inset-0 bg-[var(--color-primary)]/10 pointer-events-none"></div>
              </div>
-             <div className="flex-1 p-16 space-y-10 flex flex-col justify-between max-h-[90vh] overflow-y-auto">
-                <div className="space-y-6">
+             <div className="flex-1 p-8 lg:p-16 space-y-10 flex flex-col justify-between max-h-[80vh] md:max-h-[90vh] overflow-y-auto">
+                <div className="space-y-8">
                    <div className="flex justify-between items-start">
-                      <div className="space-y-1">
-                        <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-300">Technical Report</span>
-                        <h3 className="text-4xl font-serif font-bold text-stone-900">{selectedFabric.name}</h3>
+                      <div className="space-y-2">
+                        <span className="text-[10px] font-black uppercase tracking-[0.5em] text-[var(--color-secondary)]">Imperial Dossier</span>
+                        <h3 className="text-4xl font-serif font-bold text-[var(--color-primary)]">{selectedFabric.name}</h3>
                       </div>
-                      <button onClick={() => setSelectedFabric(null)} className="p-4 hover:bg-stone-50 rounded-full transition-all text-stone-300 hover:text-stone-900">
-                         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M6 18L18 6M6 6l12 12" strokeWidth="2"/></svg>
+                      <button onClick={() => setSelectedFabric(null)} className="p-3 hover:bg-[var(--color-background)] rounded-full transition-all text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]">
+                         <X className="w-6 h-6" />
                       </button>
                    </div>
                    
-                   <div className="space-y-8">
-                      <div className="grid grid-cols-2 gap-8 border-y border-stone-100 py-8">
-                         <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest text-stone-400">Fiber Composition</p>
-                            <p className="font-serif font-bold text-lg mt-1 text-stone-800">{selectedFabric.composition}</p>
+                   <div className="space-y-10">
+                      <div className="grid grid-cols-2 gap-8 border-y border-[var(--color-primary)]/5 py-8">
+                         <div className="space-y-1">
+                            <p className="text-[9px] font-black uppercase tracking-widest text-[var(--color-text-secondary)]">Fiber Integrity</p>
+                            <p className="font-serif font-bold text-lg text-[var(--color-primary)]">{selectedFabric.composition}</p>
                          </div>
-                         <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest text-stone-400">Weight Profile</p>
-                            <p className="font-serif font-bold text-lg mt-1 text-stone-800">{selectedFabric.weight}</p>
+                         <div className="space-y-1">
+                            <p className="text-[9px] font-black uppercase tracking-widest text-[var(--color-text-secondary)]">Weight Index</p>
+                            <p className="font-serif font-bold text-lg text-[var(--color-primary)]">{selectedFabric.weight}</p>
                          </div>
                       </div>
 
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-3">
-                           <div className="w-8 h-8 rounded-xl bg-stone-900 text-white flex items-center justify-center shadow-lg">
-                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd"/></svg>
+                      <div className="space-y-6">
+                        <div className="flex items-center gap-4">
+                           <div className="w-10 h-10 rounded-2xl bg-[var(--color-primary)] text-white flex items-center justify-center shadow-xl">
+                              <Microscope className="w-5 h-5 text-[var(--color-secondary)]" />
                            </div>
-                           <p className="text-[11px] font-black uppercase tracking-[0.3em] text-stone-900">AI Deep Analysis Synthesis</p>
+                           <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[var(--color-primary)]">Optical Synthesis Report</p>
                         </div>
-                        <p className="text-xl font-serif text-stone-600 leading-relaxed italic">
+                        <p className="text-xl font-serif text-[var(--color-text-secondary)] leading-relaxed italic border-l-4 border-[var(--color-secondary)] pl-8">
                            "{selectedFabric.aiAnalysis}"
                         </p>
                       </div>
@@ -109,124 +110,122 @@ const MaterialsLibrary: React.FC<MaterialsLibraryProps> = ({ fabrics, onAdd }) =
 
                 <button 
                   onClick={() => setSelectedFabric(null)}
-                  className="w-full py-6 bg-stone-900 text-white rounded-[2rem] text-xs font-black uppercase tracking-widest hover:bg-stone-800 shadow-2xl transition-all"
+                  className="w-full py-6 bg-[var(--color-primary)] text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-[var(--color-accent)] shadow-2xl transition-all"
                 >
-                   Close Technical Archive
+                   Close Imperial Archive
                 </button>
              </div>
           </div>
         </div>
       )}
 
-      <div className="flex justify-between items-end border-b border-stone-100 pb-10">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end border-b border-[var(--color-primary)]/5 pb-10 gap-8">
         <div>
-          <h2 className="text-6xl font-serif font-bold tracking-tight">Materials Archive</h2>
-          <p className="text-stone-400 mt-3 font-medium text-lg italic">"A digital vault of weaves, analyzed for bespoke precision."</p>
+          <h2 className="text-5xl lg:text-6xl font-serif font-bold tracking-tight text-[var(--color-primary)]">Materials Vault</h2>
+          <p className="text-[var(--color-text-secondary)] mt-4 font-serif italic text-lg lg:text-xl">"A royal collection of weaves, mapped for digital excellence."</p>
         </div>
-        <label className="group cursor-pointer relative">
-          <div className="absolute inset-0 bg-stone-900 blur-xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-          <div className="relative px-12 py-5 bg-stone-900 text-white rounded-full text-[11px] font-black uppercase tracking-[0.3em] hover:bg-stone-800 transition-all shadow-2xl flex items-center gap-4">
-             Import New Swatch
-             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" strokeWidth="2"/></svg>
+        <label className="group cursor-pointer relative w-full lg:w-auto">
+          <div className="absolute inset-0 bg-[var(--color-secondary)] blur-2xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
+          <div className="relative px-10 py-5 bg-[var(--color-primary)] text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] hover:bg-[var(--color-accent)] transition-all shadow-2xl flex items-center justify-center gap-4">
+             <Upload className="w-4 h-4 text-[var(--color-secondary)]" />
+             Import New Weave
           </div>
           <input type="file" className="hidden" onChange={handleUpload} accept="image/*" />
         </label>
       </div>
 
       {analyzing === 'new' && (
-        <div className="p-20 bg-white border border-stone-100 rounded-[4rem] flex flex-col items-center justify-center space-y-10 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.05)] animate-in zoom-in-95">
+        <div className="p-10 lg:p-20 bg-[var(--color-surface)] border border-[var(--color-primary)]/5 rounded-[3rem] lg:rounded-[4rem] flex flex-col items-center justify-center space-y-10 shadow-2xl animate-in zoom-in-95">
           <div className="relative">
-             <div className="w-24 h-24 border-2 border-stone-100 border-t-stone-900 rounded-full animate-spin"></div>
+             <div className="w-24 h-24 border-4 border-[var(--color-primary)]/5 border-t-[var(--color-secondary)] rounded-full animate-spin"></div>
              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-1.5 h-1.5 bg-stone-900 rounded-full animate-ping"></div>
+                <ShieldCheck className="w-8 h-8 text-[var(--color-primary)] animate-pulse" />
              </div>
           </div>
-          <div className="text-center space-y-3">
-            <p className="text-xs font-black uppercase tracking-[0.5em] text-stone-900">{scanMessage}</p>
-            <p className="text-[10px] text-stone-400 font-medium max-w-xs mx-auto leading-relaxed">Gemini Vision is currently evaluating surface specularity and fiber integrity.</p>
+          <div className="text-center space-y-4">
+            <p className="text-[11px] font-black uppercase tracking-[0.5em] text-[var(--color-primary)]">{scanMessage}</p>
+            <p className="text-[10px] text-[var(--color-text-secondary)] font-black uppercase tracking-widest max-w-xs mx-auto leading-relaxed">Gemini Vision is synthesizing fiber integrity & luster.</p>
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10 lg:gap-12">
         {fabrics.map(fabric => (
           <div 
             key={fabric.id} 
-            className="group bg-white rounded-[4rem] overflow-hidden border border-stone-100 shadow-sm hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] transition-all duration-700 flex flex-col relative"
+            className="group bg-[var(--color-surface)] rounded-[3rem] lg:rounded-[4rem] overflow-hidden border border-[var(--color-primary)]/5 shadow-sm hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] transition-all duration-700 flex flex-col relative"
           >
-            <div className="aspect-[4/5] relative overflow-hidden bg-stone-50">
-              <img src={fabric.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[2000ms] grayscale-[0.2] group-hover:grayscale-0" alt={fabric.name} />
+            <div className="aspect-[4/5] relative overflow-hidden bg-[var(--color-background)]">
+              <img src={fabric.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[2000ms]" alt={fabric.name} />
               
               {/* Technical Overlay HUD */}
-              <div className="absolute inset-0 bg-stone-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-between p-10 backdrop-blur-[2px]">
+              <div className="absolute inset-0 bg-[var(--color-primary)]/60 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-between p-10 backdrop-blur-[4px]">
                  <div className="flex justify-between items-start">
-                    <div className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-lg border border-white/20">
-                       <span className="text-[8px] text-white font-black uppercase tracking-widest">Spectral Data Verified</span>
+                    <div className="bg-white/10 backdrop-blur-xl px-4 py-2 rounded-xl border border-white/20 flex items-center gap-2">
+                       <ShieldCheck className="w-3 h-3 text-[var(--color-secondary)]" />
+                       <span className="text-[9px] text-white font-black uppercase tracking-widest">Spectral Integrity Verified</span>
                     </div>
                  </div>
                  <button 
                   onClick={() => setSelectedFabric(fabric)}
-                  className="w-full py-4 bg-white text-stone-900 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500"
+                  className="w-full py-5 bg-white text-[var(--color-primary)] rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl transform translate-y-8 group-hover:translate-y-0 transition-all duration-500 hover:bg-[var(--color-secondary)] hover:text-[var(--color-primary)]"
                  >
                     Full Technical Review
                  </button>
               </div>
 
-              <div className="absolute top-6 right-6">
-                 <div className="bg-stone-900 px-4 py-2 rounded-full text-white text-[9px] font-black uppercase tracking-widest shadow-2xl border border-white/10">
+              <div className="absolute top-8 right-8">
+                 <div className="bg-[var(--color-primary)]/90 backdrop-blur-xl px-5 py-2.5 rounded-full text-white text-[10px] font-black uppercase tracking-widest shadow-2xl border border-white/10">
                     S-{fabric.id.substr(0, 4).toUpperCase()}
                  </div>
               </div>
             </div>
             
-            <div className="p-10 flex flex-col flex-1 space-y-8">
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <h3 className="font-serif font-bold text-stone-900 text-3xl">{fabric.name}</h3>
-                  <div className="flex gap-1">
-                    {[1, 2, 3].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full bg-stone-900"></div>)}
+            <div className="p-10 flex flex-col flex-1 space-y-10">
+              <div className="space-y-4">
+                <div className="flex justify-between items-start">
+                  <h3 className="font-serif font-bold text-[var(--color-primary)] text-3xl leading-tight">{fabric.name}</h3>
+                  <div className="flex gap-1.5 mt-3">
+                    {[1, 2, 3].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full bg-[var(--color-secondary)]"></div>)}
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-[10px] text-stone-400 font-black uppercase tracking-[0.2em]">{fabric.type}</span>
-                  <div className="h-px w-8 bg-stone-100"></div>
-                  <span className="text-[9px] font-serif italic text-stone-300">Verified Swatch</span>
+                <div className="flex items-center gap-4">
+                  <span className="text-[10px] text-[var(--color-text-secondary)] font-black uppercase tracking-[0.2em]">{fabric.type}</span>
+                  <div className="h-px w-8 bg-[var(--color-primary)]/10"></div>
+                  <span className="text-[10px] font-serif italic text-[var(--color-secondary)] font-bold">Royal Selection</span>
                 </div>
               </div>
               
               {fabric.aiAnalysis && (
-                <div className="flex-1 bg-stone-50/70 rounded-[2.5rem] p-8 border border-stone-100 group-hover:bg-white group-hover:border-stone-200 transition-all duration-500 relative overflow-hidden">
-                  {/* Decorative AI Logo */}
-                  <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-stone-900/[0.02] rounded-full pointer-events-none"></div>
-                  
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-7 h-7 bg-stone-900 text-white rounded-lg flex items-center justify-center shadow-lg transform -rotate-12 group-hover:rotate-0 transition-transform">
-                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd"/></svg>
+                <div className="flex-1 bg-[var(--color-background)] rounded-[2.5rem] p-8 border border-[var(--color-primary)]/5 group-hover:bg-white group-hover:border-[var(--color-secondary)]/20 transition-all duration-500 relative overflow-hidden group/insight">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-8 h-8 bg-[var(--color-primary)] text-white rounded-xl flex items-center justify-center shadow-lg transform -rotate-12 group-hover/insight:rotate-0 transition-transform">
+                      <Microscope className="w-4 h-4 text-[var(--color-secondary)]" />
                     </div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-900">Atelier AI Insights</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--color-primary)]">Atelier Insights</span>
                   </div>
-                  <p className="text-[12px] text-stone-500 leading-relaxed font-serif italic line-clamp-4 group-hover:text-stone-700 transition-colors">
+                  <p className="text-[13px] text-[var(--color-text-secondary)] leading-relaxed font-serif italic line-clamp-4 group-hover/insight:text-[var(--color-primary)] transition-colors">
                     "{fabric.aiAnalysis}"
                   </p>
                 </div>
               )}
 
-              <div className="pt-4 border-t border-stone-100 flex justify-between items-center">
+              <div className="pt-8 border-t border-[var(--color-primary)]/5 flex justify-between items-center">
                  <div className="flex gap-10">
-                    <div className="space-y-1">
-                       <span className="block text-[8px] font-black text-stone-300 uppercase tracking-widest">GSM Profile</span>
-                       <span className="font-serif font-bold text-stone-700 text-sm">Light-Mid</span>
-                    </div>
-                    <div className="space-y-1">
-                       <span className="block text-[8px] font-black text-stone-300 uppercase tracking-widest">Drape Index</span>
-                       <span className="font-serif font-bold text-stone-700 text-sm">High</span>
+                    <div className="space-y-1.5">
+                       <span className="block text-[9px] font-black text-[var(--color-text-secondary)] uppercase tracking-widest">Drape Index</span>
+                       <div className="flex items-center gap-2">
+                          <Layers className="w-3 h-3 text-[var(--color-secondary)]" />
+                          <span className="font-serif font-bold text-[var(--color-primary)] text-sm">Superior</span>
+                       </div>
                     </div>
                  </div>
                  <button 
                   onClick={() => setSelectedFabric(fabric)}
-                  className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-900 border-b-2 border-stone-900 pb-1 hover:text-stone-400 hover:border-stone-400 transition-all"
+                  className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--color-primary)] group/link"
                  >
                     Full Specs
+                    <ChevronRight className="w-4 h-4 text-[var(--color-secondary)] group-hover/link:translate-x-1 transition-transform" />
                  </button>
               </div>
             </div>
@@ -235,14 +234,14 @@ const MaterialsLibrary: React.FC<MaterialsLibraryProps> = ({ fabrics, onAdd }) =
       </div>
       
       {fabrics.length === 0 && !analyzing && (
-        <div className="h-[50vh] border-2 border-dashed border-stone-100 rounded-[5rem] flex flex-col items-center justify-center text-center p-20 space-y-6 group">
-           <div className="w-24 h-24 bg-stone-50 rounded-full flex items-center justify-center text-stone-100 group-hover:bg-stone-900 group-hover:text-white transition-all duration-1000 shadow-inner">
-              <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M3 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7c-2 0-3 1-3 3zm0 4h16" strokeWidth="1"/></svg>
+        <div className="h-[60vh] border-2 border-dashed border-[var(--color-primary)]/10 rounded-[4rem] lg:rounded-[5rem] flex flex-col items-center justify-center text-center p-10 lg:p-20 space-y-8 group">
+           <div className="w-24 h-24 bg-[var(--color-background)] rounded-full flex items-center justify-center text-[var(--color-primary)] group-hover:bg-[var(--color-primary)] group-hover:text-white transition-all duration-1000 shadow-inner">
+              <SwatchBook className="w-10 h-10" />
            </div>
-           <div className="space-y-2">
-              <h3 className="text-2xl font-serif font-bold text-stone-900">Archive Currently Empty</h3>
-              <p className="text-stone-300 italic font-serif max-w-sm mx-auto leading-relaxed">
-                "Import swatches of silks, wools, and linens to initiate visual synthesis and weave intelligence."
+           <div className="space-y-4">
+              <h3 className="text-3xl font-serif font-bold text-[var(--color-primary)] tracking-tight">Archive Currently Empty</h3>
+              <p className="text-[var(--color-text-secondary)] italic font-serif text-lg lg:text-xl max-w-sm mx-auto leading-relaxed">
+                "Import swatches of silks, wools, and linens to initiate imperial visual synthesis."
               </p>
            </div>
         </div>
