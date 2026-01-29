@@ -106,7 +106,8 @@ const LiveWorkshop: React.FC<LiveWorkshopProps> = ({ concepts, orders }) => {
     setIsConnecting(true);
 
     try {
-      const ai = new GoogleGenAI();
+      const apiKey = (import.meta.env.VITE_GEMINI_API_KEY as string) || "";
+      const ai = new GoogleGenAI(apiKey);
       
       inputAudioCtx.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
       outputAudioCtx.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });

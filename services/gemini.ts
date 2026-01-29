@@ -69,12 +69,17 @@ async function standardizeImage(dataUrl: string, maxDimension: number = 1024): P
 
 const extractBase64 = (url: string) => url.split(',')[1];
 
+const getGenAI = () => {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
+  return new GoogleGenAI(apiKey);
+};
+
 /**
  * Generates a "Design DNA" blueprint.
  */
 export const generateDesignDNA = async (frontViewImage: string, style: StyleConcept): Promise<string> => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI();
+    const ai = getGenAI();
     const img = await standardizeImage(frontViewImage, 768);
     const response = await ai.models.generateContent({
       model: 'gemini-1.5-pro',
@@ -106,7 +111,7 @@ USER INSTRUCTIONS: Extract Design DNA for "${style.title}".` }
 
 export const searchInspiration = async (query: string): Promise<{ text: string, links: { title: string, uri: string }[] }> => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI();
+    const ai = getGenAI();
     const response = await ai.models.generateContent({
       model: 'gemini-1.5-flash',
       contents: `SYSTEM: Search for high-end fashion design related to the user query. Provide a deep aesthetic synthesis.
@@ -125,7 +130,7 @@ USER INSTRUCTIONS: Query: "${query}"`,
 
 export const generateMoodImages = async (description: string): Promise<string[]> => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI();
+    const ai = getGenAI();
     const aspects: ("1:1" | "3:4" | "4:3")[] = ["3:4", "1:1", "4:3", "3:4"];
     const results: string[] = [];
     for (const aspect of aspects) {
@@ -145,7 +150,7 @@ USER INSTRUCTIONS: Theme: "${description}". Aspect ratio: ${aspect}.`,
 
 export const refineDesign = async (baseImage: string, sketchOverlay: string, instructions: string): Promise<string | null> => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI();
+    const ai = getGenAI();
     const base = await standardizeImage(baseImage, 512);
     const sketch = await standardizeImage(sketchOverlay, 512);
     const response = await ai.models.generateContent({
@@ -178,7 +183,7 @@ USER INSTRUCTIONS: ${instructions}` }
 
 export const generatePattern = async (style: StyleConcept, measurements: Measurements): Promise<string> => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI();
+    const ai = getGenAI();
     const response = await ai.models.generateContent({
       model: 'gemini-1.5-flash',
       contents: `SYSTEM: Create a professional technical pattern description based on provided style and measurements.
@@ -191,7 +196,7 @@ USER INSTRUCTIONS: Style: "${style.title}". Measurements: ${JSON.stringify(measu
 
 export const analyzeFabric = async (imageUrl: string): Promise<string> => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI();
+    const ai = getGenAI();
     const img = await standardizeImage(imageUrl, 512);
     const response = await ai.models.generateContent({
       model: 'gemini-1.5-flash',
@@ -208,7 +213,7 @@ export const analyzeFabric = async (imageUrl: string): Promise<string> => {
 
 export const predictMeasurements = async (photos: Record<string, string>) => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI();
+    const ai = getGenAI();
     const p = {
       front: await standardizeImage(photos.front),
       side: await standardizeImage(photos.side),
@@ -261,7 +266,7 @@ USER INSTRUCTIONS: Extract measurements from the attached front, side, and back 
 
 export const generateStyles = async (measurements: Measurements, photos: Record<string, string>, suggestion: string = "") => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI();
+    const ai = getGenAI();
     const img = await standardizeImage(photos.front, 512);
     const response = await ai.models.generateContent({
       model: 'gemini-1.5-pro',
@@ -303,7 +308,7 @@ export const generateStyleImage = async (
   designDNA?: string
 ) => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI();
+    const ai = getGenAI();
     const personRef = await standardizeImage(userPhotoRef, 768);
     
     const parts: any[] = [

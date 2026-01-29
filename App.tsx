@@ -101,6 +101,12 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const checkKey = async () => {
+      // Skip prompt if API key is provided via environment variable
+      if (import.meta.env.VITE_GEMINI_API_KEY) {
+        setShowKeyPrompt(false);
+        return;
+      }
+
       if (typeof window.aistudio !== 'undefined') {
         const hasKey = await window.aistudio.hasSelectedApiKey();
         if (!hasKey) setShowKeyPrompt(true);
