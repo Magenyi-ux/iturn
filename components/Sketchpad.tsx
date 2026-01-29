@@ -1,7 +1,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { StyleConcept } from '../types';
-import { refineDesign, searchInspiration } from '../services/gemini';
+import { refineDesign, searchInspiration, CoutureError } from '../services/gemini';
 
 interface SketchpadProps {
   baseImage: string;
@@ -20,6 +20,7 @@ const Sketchpad: React.FC<SketchpadProps> = ({ baseImage, style, onSave, onClose
   const [isDrawing, setIsDrawing] = useState(false);
   const [instructions, setInstructions] = useState('');
   const [refining, setRefining] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResult, setSearchResult] = useState<{ text: string, links: { title: string, uri: string }[] } | null>(null);
   const [searching, setSearching] = useState(false);
@@ -82,6 +83,7 @@ const Sketchpad: React.FC<SketchpadProps> = ({ baseImage, style, onSave, onClose
     const canvas = canvasRef.current;
     if (!canvas) return;
     setRefining(true);
+    setError(null);
     const sketchData = canvas.toDataURL('image/png');
     try {
       const refined = await refineDesign(currentBaseImage, sketchData, instructions);
@@ -92,9 +94,15 @@ const Sketchpad: React.FC<SketchpadProps> = ({ baseImage, style, onSave, onClose
         setInstructions('');
       }
     } catch (e) {
-      console.error(e);
+      console.error("Refinement error", e);
+      if (e instanceof CoutureError) {
+        setError(e.message);
+      } else {
+        setError("The artistic synthesis failed. Please check your network or design instructions.");
+      }
+    } finally {
+      setRefining(false);
     }
-    setRefining(false);
   };
 
   const handleSearch = async () => {
@@ -179,13 +187,22 @@ const Sketchpad: React.FC<SketchpadProps> = ({ baseImage, style, onSave, onClose
               Iteration #{iterationCount}
             </div>
           )}
+
+          {refining && (
+             <div className="absolute inset-0 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center z-50">
+                <div className="text-center space-y-4">
+                  <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto"></div>
+                  <p className="text-[10px] font-black text-white uppercase tracking-[0.4em]">Synthesizing Vision...</p>
+                </div>
+             </div>
+          )}
         </div>
       </div>
 
       <div className="w-96 bg-stone-800 border-l border-stone-700 flex flex-col p-8 space-y-8 overflow-y-auto">
         <div>
           <h3 className="text-xl font-serif font-bold text-white mb-2">Design Suite</h3>
-          <p className="text-[10px] text-stone-400 uppercase tracking-widest font-black">Sketch iterative refinements (Color Mode)</p>
+          <p className="text-[10px] text-stone-400 uppercase tracking-widest font-black">Sketch iterative refinements</p>
         </div>
 
         <div className="space-y-4">
@@ -196,6 +213,15 @@ const Sketchpad: React.FC<SketchpadProps> = ({ baseImage, style, onSave, onClose
             className="w-full h-32 bg-stone-900 border border-stone-700 rounded-xl p-4 text-sm text-white focus:border-white transition-all resize-none outline-none placeholder:text-stone-600"
             placeholder="Describe your color and structure changes..."
           />
+          
+          {error && (
+            <div className="p-4 bg-red-900/40 border border-red-500/50 rounded-xl animate-in slide-in-from-top-2">
+               <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest leading-relaxed">
+                 {error}
+               </p>
+            </div>
+          )}
+
           <button
             onClick={handleRefine}
             disabled={refining}

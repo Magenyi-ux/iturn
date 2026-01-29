@@ -15,11 +15,8 @@ import StyleTimeline from './components/StyleTimeline';
 import SavedStudio from './components/SavedStudio';
 import AdminDashboard from './components/AdminDashboard';
 import PricingModal from './components/PricingModal';
-import Profile from './components/Profile';
+import LiveWorkshop from './components/LiveWorkshop';
 import { predictMeasurements, generateStyles } from './services/gemini';
-import Auth from './components/Auth';
-import { loadUserState, saveUserState } from './services/db';
-import { supabase, isSupabaseConfigured } from './services/supabase';
 
 const MOCK_CLIENTS: Client[] = [
   { id: '1', name: 'Sebastian Vane', email: 'vane@example.com', phone: '+123', measurements: INITIAL_MEASUREMENTS, history: [], lastVisit: '2 days ago' },
@@ -34,23 +31,37 @@ const INITIAL_INVENTORY: InventoryItem[] = [
 ];
 
 const App: React.FC = () => {
-  const [user, setUser] = useState<{ id: string, email: string } | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [state, setState] = useState<AppState>({
-    photos: {},
-    measurements: INITIAL_MEASUREMENTS,
-    characteristics: INITIAL_CHARACTERISTICS,
-    isPredicting: false,
-    isGeneratingStyles: false,
-    styleConcepts: [],
-    selectedStyles: [],
-    userSuggestion: '',
-    view: 'vault',
-    clients: MOCK_CLIENTS,
-    fabrics: [],
-    orders: [],
-    inventory: INITIAL_INVENTORY,
-    savedInspirations: []
+  const [state, setState] = useState<AppState>(() => {
+    const saved = localStorage.getItem('atelier_state_v2');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return { 
+          ...parsed, 
+          isPredicting: false, 
+          isGeneratingStyles: false,
+          inventory: parsed.inventory || INITIAL_INVENTORY
+        };
+      } catch (e) {
+        console.error("Failed to load saved state", e);
+      }
+    }
+    return {
+      photos: {},
+      measurements: INITIAL_MEASUREMENTS,
+      characteristics: INITIAL_CHARACTERISTICS,
+      isPredicting: false,
+      isGeneratingStyles: false,
+      styleConcepts: [],
+      selectedStyles: [],
+      userSuggestion: '',
+      view: 'vault',
+      clients: MOCK_CLIENTS,
+      fabrics: [],
+      orders: [],
+      inventory: INITIAL_INVENTORY,
+      savedInspirations: []
+    };
   });
 
   const [sketchContext, setSketchContext] = useState<{ style: StyleConcept, image: string } | null>(null);
@@ -58,53 +69,8 @@ const App: React.FC = () => {
   const [showKeyPrompt, setShowKeyPrompt] = useState(false);
 
   useEffect(() => {
-    const initAuth = async () => {
-      if (!isSupabaseConfigured) {
-        const cloudState = await loadUserState();
-        if (cloudState) setState(cloudState);
-        setLoading(false);
-        return;
-      }
-
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser({ id: session.user.id, email: session.user.email! });
-        const cloudState = await loadUserState();
-        if (cloudState) setState(cloudState);
-      }
-      setLoading(false);
-    };
-    initAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        setUser({ id: session.user.id, email: session.user.email! });
-        const cloudState = await loadUserState();
-        if (cloudState) setState(cloudState);
-      } else {
-        setUser(null);
-      }
-    });
-
-    const handleGuest = async () => {
-      setUser({ id: 'guest', email: 'guest@atelier.ai' });
-      const cloudState = await loadUserState();
-      if (cloudState) setState(cloudState);
-    };
-
-    window.addEventListener('auth:guest' as any, handleGuest);
-
-    return () => {
-      subscription.unsubscribe();
-      window.removeEventListener('auth:guest' as any, handleGuest);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (user && !loading) {
-      saveUserState(state);
-    }
-  }, [state, user, loading]);
+    localStorage.setItem('atelier_state_v2', JSON.stringify(state));
+  }, [state]);
 
   useEffect(() => {
     const checkKey = async () => {
@@ -130,7 +96,7 @@ const App: React.FC = () => {
       measurements: INITIAL_MEASUREMENTS,
       characteristics: INITIAL_CHARACTERISTICS,
       styleConcepts: [],
-      view: 'capture',
+      view: 'fitting_choice',
       selectedClientId: undefined,
       userSuggestion: ''
     }));
@@ -228,18 +194,6 @@ const App: React.FC = () => {
     }));
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-stone-50 flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-stone-100 border-t-stone-900 rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Auth />;
-  }
-
   return (
     <div className="min-h-screen flex bg-stone-50">
       {showKeyPrompt && (
@@ -289,11 +243,12 @@ const App: React.FC = () => {
           {[
             { id: 'vault', label: 'Client Vault', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
             { id: 'inspiration', label: 'Inspiration', icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' },
+            { id: 'live_workshop', label: 'Live Workshop', icon: 'M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2-2v8a2 2 0 002 2z' },
+            { id: 'materials', label: 'Materials Library', icon: 'M3 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7c-2 0-3 1-3 3zm0 4h16' },
             { id: 'workroom', label: 'Workroom', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' },
             { id: 'admin', label: 'Database', icon: 'M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7c-2 0-3 1-3 3zm0 4h16M4 15h16' },
             { id: 'archive', label: 'Saved Studio', icon: 'M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z' },
-            { id: 'capture', label: 'New Fitting', icon: 'M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z' },
-            { id: 'profile', label: 'Profile', icon: 'M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z' }
+            { id: 'fitting_choice', label: 'New Fitting', icon: 'M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z' }
           ].map((item) => (
             <button
               key={item.id}
@@ -309,18 +264,6 @@ const App: React.FC = () => {
             </button>
           ))}
         </nav>
-
-        <div className="p-4 border-t border-stone-800">
-          <button
-            onClick={() => supabase.auth.signOut()}
-            className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl transition-all text-stone-400 hover:text-white hover:bg-stone-800"
-          >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            <span className="hidden lg:block text-xs font-bold uppercase tracking-widest">Sign Out</span>
-          </button>
-        </div>
       </aside>
 
       <main className="flex-1 p-12 overflow-y-auto">
@@ -341,9 +284,23 @@ const App: React.FC = () => {
           )
         )}
 
+        {state.view === 'live_workshop' && (
+          <LiveWorkshop 
+            concepts={state.styleConcepts}
+            orders={state.orders}
+          />
+        )}
+
+        {state.view === 'materials' && (
+          <MaterialsLibrary 
+            fabrics={state.fabrics} 
+            onAdd={addFabric}
+          />
+        )}
+
         {state.view === 'inspiration' && (
           <InspirationHub 
-            onGenerate={(brief) => setState(prev => ({ ...prev, userSuggestion: brief, view: 'capture', photos: {} }))} 
+            onGenerate={(brief) => setState(prev => ({ ...prev, userSuggestion: brief, view: 'fitting_choice', photos: {} }))} 
             onSaveInspiration={handleSaveInspiration}
           />
         )}
@@ -351,7 +308,7 @@ const App: React.FC = () => {
         {state.view === 'archive' && (
           <SavedStudio 
             inspirations={state.savedInspirations} 
-            onAction={(item) => setState(prev => ({ ...prev, userSuggestion: item.content, view: 'capture', photos: {} }))}
+            onAction={(item) => setState(prev => ({ ...prev, userSuggestion: item.content, view: 'fitting_choice', photos: {} }))}
           />
         )}
 
@@ -380,13 +337,45 @@ const App: React.FC = () => {
           />
         )}
 
-        {state.view === 'capture' && <PhotoUpload onPhotosComplete={handlePhotosComplete} />}
+        {state.view === 'fitting_choice' && (
+           <div className="h-full flex flex-col items-center justify-center space-y-16 animate-in zoom-in-95 duration-1000">
+              <div className="text-center space-y-6">
+                <h2 className="text-6xl font-serif font-bold text-stone-900">Initiate Fitting</h2>
+                <p className="text-stone-400 italic text-xl max-w-lg mx-auto">"Precision is the bridge between the sketch and the garment."</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl w-full">
+                <button 
+                  onClick={() => setState(prev => ({ ...prev, view: 'capture' }))}
+                  className="group bg-white p-12 rounded-[4rem] border border-stone-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all flex flex-col items-center text-center space-y-8"
+                >
+                   <div className="w-24 h-24 bg-stone-900 text-white rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
+                      <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" strokeWidth="1.5"/></svg>
+                   </div>
+                   <div className="space-y-2">
+                     <h3 className="text-2xl font-serif font-bold">Anatomic AI Capture</h3>
+                     <p className="text-stone-400 text-sm leading-relaxed">Predict measurements from three technical silhouette frames.</p>
+                   </div>
+                </button>
+                <button 
+                  onClick={() => setState(prev => ({ ...prev, view: 'measurements' }))}
+                  className="group bg-stone-900 p-12 rounded-[4rem] shadow-2xl hover:-translate-y-2 transition-all flex flex-col items-center text-center space-y-8"
+                >
+                   <div className="w-24 h-24 bg-white text-stone-900 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
+                      <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758L5 19m0-14l3.121 3.121" strokeWidth="1.5"/></svg>
+                   </div>
+                   <div className="space-y-2">
+                     <h3 className="text-2xl font-serif font-bold text-white">Direct Entry</h3>
+                     <p className="text-stone-500 text-sm leading-relaxed">Manually feed in measurements for established client files.</p>
+                   </div>
+                </button>
+              </div>
+           </div>
+        )}
 
-        {state.view === 'profile' && user && (
-          <Profile
-            state={state}
-            user={user}
-            onNavigate={(view) => setState(prev => ({ ...prev, view }))}
+        {state.view === 'capture' && (
+          <PhotoUpload 
+            onPhotosComplete={handlePhotosComplete} 
+            onManualEntry={() => setState(prev => ({ ...prev, view: 'measurements' }))} 
           />
         )}
 

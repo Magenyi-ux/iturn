@@ -95,7 +95,7 @@ export interface AppState {
   styleConcepts: StyleConcept[];
   selectedStyles: string[];
   userSuggestion: string;
-  view: 'capture' | 'measurements' | 'styles' | 'vault' | 'materials' | 'workroom' | 'sketchpad' | 'analytics' | 'inspiration' | 'blueprints' | 'archive' | 'admin' | 'profile';
+  view: 'capture' | 'measurements' | 'styles' | 'vault' | 'materials' | 'workroom' | 'sketchpad' | 'analytics' | 'inspiration' | 'blueprints' | 'archive' | 'admin' | 'live_workshop' | 'fitting_choice';
   clients: Client[];
   fabrics: Fabric[];
   orders: Order[];
