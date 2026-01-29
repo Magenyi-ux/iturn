@@ -74,11 +74,11 @@ const InspirationHub: React.FC<InspirationHubProps> = ({ onGenerate, onSaveInspi
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-16 pb-32 animate-in fade-in duration-700">
+    <div className="max-w-7xl mx-auto space-y-20 pb-32 animate-luxury-fade">
       {/* Lightbox Modal */}
       {maximizedImage && (
         <div 
-          className="fixed inset-0 z-[100] bg-stone-900/95 backdrop-blur-2xl flex items-center justify-center p-8 cursor-zoom-out animate-in fade-in duration-300"
+          className="fixed inset-0 z-[100] bg-[var(--color-primary)]/95 backdrop-blur-2xl flex items-center justify-center p-8 cursor-zoom-out animate-in fade-in duration-300"
           onClick={() => setMaximizedImage(null)}
         >
           <div className="relative max-w-5xl w-full max-h-full flex items-center justify-center">
@@ -99,9 +99,9 @@ const InspirationHub: React.FC<InspirationHubProps> = ({ onGenerate, onSaveInspi
         </div>
       )}
 
-      <div className="text-center space-y-4">
-        <h2 className="text-6xl font-serif font-bold tracking-tight text-stone-900">Inspiration Hub</h2>
-        <p className="text-stone-400 font-serif italic text-lg">"Gleaning the world's aesthetic for the next masterpiece."</p>
+      <div className="text-center space-y-6">
+        <h2 className="text-6xl lg:text-7xl font-serif font-bold tracking-tight text-[var(--color-primary)]">Inspiration Hub</h2>
+        <p className="text-[var(--color-text-secondary)] font-serif italic text-xl">"Gleaning the world's aesthetic for the next masterpiece."</p>
       </div>
 
       <div className="max-w-3xl mx-auto">
@@ -111,24 +111,24 @@ const InspirationHub: React.FC<InspirationHubProps> = ({ onGenerate, onSaveInspi
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            className="w-full h-24 bg-transparent border-b-2 border-stone-200 focus:border-stone-900 outline-none text-4xl font-serif text-center transition-all placeholder:text-stone-100"
+            className="w-full h-24 bg-transparent border-b-2 border-[var(--color-primary)]/10 focus:border-[var(--color-secondary)] outline-none text-4xl lg:text-5xl font-serif text-center transition-all placeholder:text-[var(--color-primary)]/5"
             placeholder="Search silhouettes..."
           />
           <button 
             onClick={handleSearch}
             disabled={loading}
-            className="absolute right-0 top-1/2 -translate-y-1/2 p-4 bg-stone-900 text-white rounded-2xl shadow-xl hover:scale-110 active:scale-95 transition-all disabled:opacity-50"
+            className="absolute right-0 top-1/2 -translate-y-1/2 p-5 bg-[var(--color-primary)] text-white rounded-2xl shadow-2xl hover:scale-110 active:scale-95 transition-all disabled:opacity-50"
           >
-            {loading ? <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin"></div> : "Seek"}
+            {loading ? <div className="w-8 h-8 border-2 border-[var(--color-secondary)]/20 border-t-[var(--color-secondary)] rounded-full animate-spin"></div> : "Seek"}
           </button>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-3 mt-8">
+        <div className="flex flex-wrap justify-center gap-4 mt-12">
           {trending.map(t => (
             <button 
               key={t}
               onClick={() => { setQuery(t); handleSearch(); }}
-              className="px-5 py-2 rounded-full border border-stone-100 bg-white text-[9px] font-black uppercase tracking-widest text-stone-400 hover:border-stone-900 hover:text-stone-900 transition-all shadow-sm"
+              className="px-6 py-2.5 rounded-full border border-[var(--color-primary)]/5 bg-[var(--color-surface)] text-[10px] font-black uppercase tracking-widest text-[var(--color-text-secondary)] hover:border-[var(--color-secondary)] hover:text-[var(--color-primary)] transition-all shadow-sm"
             >
               {t}
             </button>
@@ -143,11 +143,11 @@ const InspirationHub: React.FC<InspirationHubProps> = ({ onGenerate, onSaveInspi
                 <span className="text-[20rem] font-serif font-bold italic">Mood</span>
              </div>
 
-             <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8 relative z-10 p-4">
+             <div className="columns-1 md:columns-2 lg:columns-3 gap-10 space-y-10 relative z-10 p-4">
                 {moodImages.length === 0 && visualLoading && (
-                  <div className="col-span-full py-32 flex flex-col items-center justify-center space-y-6">
-                    <div className="w-16 h-16 border-4 border-stone-100 border-t-stone-900 rounded-full animate-spin"></div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-300">Rendering visual intelligence...</p>
+                  <div className="col-span-full py-32 flex flex-col items-center justify-center space-y-8">
+                    <div className="w-16 h-16 border-4 border-[var(--color-primary)]/5 border-t-[var(--color-secondary)] rounded-full animate-spin"></div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.4em] text-[var(--color-primary)]">Rendering visual intelligence...</p>
                   </div>
                 )}
 
@@ -239,13 +239,13 @@ const InspirationHub: React.FC<InspirationHubProps> = ({ onGenerate, onSaveInspi
                    </div>
                 </div>
 
-                <div className="bg-stone-900 text-stone-50 p-10 rounded-[3rem] shadow-2xl space-y-6">
-                   <p className="text-xs font-serif leading-relaxed text-stone-400">
-                      Based on this visual research, the AI recommends exploring **Silk-Wool blends** and **Architectural Lapels**.
+                <div className="bg-[var(--color-primary)] text-white p-10 rounded-[3rem] shadow-2xl space-y-8">
+                   <p className="text-sm font-serif leading-relaxed text-white/60 italic">
+                      "Based on this imperial visual research, we recommend exploring structured **Silk-Wool blends** and **Architectural Seamlines** to achieve this silhouette."
                    </p>
                    <button 
                     onClick={handleGenerateCollection} 
-                    className="w-full py-4 bg-white text-stone-900 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-stone-100 transition-all shadow-xl active:scale-95 transform"
+                    className="w-full py-6 bg-white text-[var(--color-primary)] rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-[var(--color-secondary)] transition-all shadow-xl active:scale-95 transform"
                    >
                       Generate Collection
                    </button>

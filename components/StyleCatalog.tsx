@@ -106,35 +106,35 @@ const StyleCatalog: React.FC<StyleCatalogProps> = ({ concepts, measurements, cha
   const filtered = filter === 'All' ? concepts : concepts.filter(c => c.category === filter);
 
   return (
-    <div className="space-y-12 pb-24">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-8 border-b border-stone-100 pb-12">
-        <div className="text-left space-y-2">
-          <h2 className="text-4xl font-serif font-bold text-stone-900">Design Collection</h2>
-          <p className="text-stone-500">Couture concepts synchronized with technical Design DNA for perspective accuracy.</p>
+    <div className="space-y-12 pb-24 animate-luxury-fade">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-8 border-b border-[var(--color-primary)]/5 pb-12">
+        <div className="text-left space-y-3">
+          <h2 className="text-5xl font-serif font-bold text-[var(--color-primary)] tracking-tight">Imperial Collection</h2>
+          <p className="text-[var(--color-text-secondary)] font-serif italic text-lg">Couture concepts synchronized with technical Design DNA.</p>
         </div>
         
-        <div className="flex bg-stone-100 p-1.5 rounded-2xl border border-stone-200">
+        <div className="flex bg-[var(--color-primary)]/[0.03] p-1.5 rounded-2xl border border-[var(--color-primary)]/5">
           <button 
             onClick={() => setDisplayMode('mannequin')}
-            className={`px-6 py-2.5 rounded-xl text-xs font-bold tracking-widest uppercase transition-all ${displayMode === 'mannequin' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-400'}`}
+            className={`px-6 py-2.5 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all ${displayMode === 'mannequin' ? 'bg-white text-[var(--color-primary)] shadow-xl' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]'}`}
           >
             Digital Dress Form
           </button>
           <button 
             onClick={() => setDisplayMode('avatar')}
-            className={`px-6 py-2.5 rounded-xl text-xs font-bold tracking-widest uppercase transition-all ${displayMode === 'avatar' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-400'}`}
+            className={`px-6 py-2.5 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all ${displayMode === 'avatar' ? 'bg-white text-[var(--color-primary)] shadow-xl' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]'}`}
           >
             Runway Avatar
           </button>
         </div>
       </div>
 
-      <div className="flex flex-wrap justify-center gap-3">
+      <div className="flex flex-wrap justify-center gap-4">
         {categories.map(cat => (
           <button
             key={cat}
             onClick={() => setFilter(cat)}
-            className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${filter === cat ? 'bg-stone-900 text-stone-50 shadow-md' : 'bg-white border border-stone-200 text-stone-400 hover:border-stone-900'}`}
+            className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${filter === cat ? 'bg-[var(--color-primary)] text-white shadow-xl scale-105' : 'bg-[var(--color-surface)] border border-[var(--color-primary)]/10 text-[var(--color-text-secondary)] hover:border-[var(--color-secondary)]'}`}
           >
             {cat}
           </button>
@@ -159,28 +159,28 @@ const StyleCatalog: React.FC<StyleCatalogProps> = ({ concepts, measurements, cha
           const styleError = errors[style.id];
 
           return (
-            <div key={style.id} className="bg-white rounded-3xl overflow-hidden border border-stone-100 shadow-sm flex flex-col md:flex-row h-full hover:shadow-xl transition-all">
-              <div className="md:w-1/2 aspect-[3/4] bg-stone-50 relative group select-none">
+            <div key={style.id} className="group bg-[var(--color-surface)] rounded-[3rem] overflow-hidden border border-[var(--color-primary)]/5 shadow-sm flex flex-col md:flex-row h-full hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] transition-all duration-700">
+              <div className="md:w-1/2 aspect-[3/4] bg-[var(--color-background)] relative group/img select-none">
                 {currentImage ? (
                   <div className="w-full h-full relative overflow-hidden">
-                    <img src={currentImage} className="w-full h-full object-cover transition-opacity duration-300" alt={style.title} />
+                    <img src={currentImage} className="w-full h-full object-cover transition-all duration-1000 group-hover/img:scale-110" alt={style.title} />
                     
                     {!currentRefinedImage && (
                       <div 
-                        className="absolute inset-0 cursor-ew-resize flex items-center justify-center"
+                        className="absolute inset-0 cursor-ew-resize flex items-center justify-center bg-black/20 opacity-0 group-hover/img:opacity-100 transition-opacity duration-500 backdrop-blur-[2px]"
                         onMouseMove={(e) => {
                           const rect = e.currentTarget.getBoundingClientRect();
                           const x = (e.clientX - rect.left) / rect.width;
                           setScrollProgress(prev => ({ ...prev, [style.id]: Math.max(0, Math.min(0.99, x)) }));
                         }}
                       >
-                        <div className="flex flex-col gap-4 items-center">
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-md px-4 py-2 rounded-full text-[10px] text-white font-bold uppercase tracking-[0.2em] border border-white/20">
+                        <div className="flex flex-col gap-6 items-center transform translate-y-4 group-hover/img:translate-y-0 transition-transform duration-700">
+                          <div className="bg-white/10 backdrop-blur-xl px-5 py-2.5 rounded-full text-[10px] text-white font-black uppercase tracking-[0.3em] border border-white/20">
                             Rotate Design
                           </div>
                           <button 
                             onClick={(e) => { e.stopPropagation(); setQuickViewStyle(style); }}
-                            className="opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0 bg-white text-stone-900 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-2xl hover:bg-stone-900 hover:text-white"
+                            className="bg-white text-[var(--color-primary)] px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl hover:bg-[var(--color-secondary)] transition-all"
                           >
                             Quick View
                           </button>
@@ -188,10 +188,10 @@ const StyleCatalog: React.FC<StyleCatalogProps> = ({ concepts, measurements, cha
                       </div>
                     )}
 
-                    <div className="absolute top-4 left-4 flex flex-col gap-2">
+                    <div className="absolute top-6 left-6 flex flex-col gap-3">
                        <button 
                          onClick={() => onEdit(style, currentImage)}
-                         className="bg-white/90 backdrop-blur-md p-2.5 rounded-xl border border-stone-100 shadow hover:bg-stone-900 hover:text-white transition-all"
+                         className="bg-white/90 backdrop-blur-xl p-3 rounded-2xl border border-white/20 shadow-2xl hover:bg-[var(--color-primary)] hover:text-white transition-all text-[var(--color-primary)]"
                          title="Sketch & Refine this version"
                        >
                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -206,7 +206,7 @@ const StyleCatalog: React.FC<StyleCatalogProps> = ({ concepts, measurements, cha
                              delete n[style.id];
                              return n;
                            })}
-                           className="bg-white/90 backdrop-blur-md p-2.5 rounded-xl border border-stone-100 shadow hover:bg-stone-900 hover:text-white transition-all"
+                           className="bg-white/90 backdrop-blur-xl p-3 rounded-2xl border border-white/20 shadow-2xl hover:bg-[var(--color-primary)] hover:text-white transition-all text-[var(--color-primary)]"
                            title="Back to 360 View"
                          >
                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>

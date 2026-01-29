@@ -6,9 +6,11 @@ import { useTheme } from './components/ThemeProvider';
 import {
   Users, Sparkles, Video, SwatchBook, Briefcase, Database,
   Bookmark, Camera, LogOut, Palette, Settings, Menu, X,
-  Crown, ChevronRight, Home
+  Crown, ChevronRight, Home, BookOpen
 } from 'lucide-react';
 import AuthPage from './components/AuthPage';
+import LandingPage from './components/LandingPage';
+import DocsPage from './components/DocsPage';
 import OnboardingTour from './components/OnboardingTour';
 import AIConcierge from './components/AIConcierge';
 import PhotoUpload from './components/PhotoUpload';
@@ -44,6 +46,7 @@ const App: React.FC = () => {
   const { theme, setTheme } = useTheme();
   const [user, setUser] = useState<any>(null);
   const [guestMode, setGuestMode] = useState(() => localStorage.getItem('atelier_guest_mode') === 'true');
+  const [hasEntered, setHasEntered] = useState(() => localStorage.getItem('atelier_has_entered') === 'true');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showTour, setShowTour] = useState(() => localStorage.getItem('atelier_tour_completed') !== 'true');
   const [state, setState] = useState<AppState>(() => {
@@ -70,7 +73,7 @@ const App: React.FC = () => {
       styleConcepts: [],
       selectedStyles: [],
       userSuggestion: '',
-      view: 'vault',
+      view: 'landing',
       clients: MOCK_CLIENTS,
       fabrics: [],
       orders: [],
@@ -231,9 +234,26 @@ const App: React.FC = () => {
     await supabase.auth.signOut();
     setGuestMode(false);
     setUser(null);
+    setHasEntered(false);
+    localStorage.removeItem('atelier_has_entered');
+    setState(prev => ({ ...prev, view: 'landing' }));
   };
 
-  if (!user && !guestMode) {
+  const handleEnterAtelier = () => {
+    setHasEntered(true);
+    localStorage.setItem('atelier_has_entered', 'true');
+    setState(prev => ({ ...prev, view: 'vault' }));
+  };
+
+  if (state.view === 'landing') {
+    return <LandingPage onEnter={handleEnterAtelier} onDocs={() => setState(prev => ({ ...prev, view: 'docs' }))} />;
+  }
+
+  if (state.view === 'docs') {
+    return <DocsPage onBack={() => setState(prev => ({ ...prev, view: hasEntered ? 'vault' : 'landing' }))} />;
+  }
+
+  if (!user && !guestMode && hasEntered) {
     return <AuthPage onGuestMode={() => setGuestMode(true)} />;
   }
 
@@ -245,7 +265,8 @@ const App: React.FC = () => {
     { id: 'workroom', label: 'Orders', icon: Briefcase },
     { id: 'admin', label: 'Data', icon: Database },
     { id: 'archive', label: 'Saved', icon: Bookmark },
-    { id: 'fitting_choice', label: 'Fitting', icon: Camera }
+    { id: 'fitting_choice', label: 'Fitting', icon: Camera },
+    { id: 'docs', label: 'Docs', icon: BookOpen }
   ];
 
   const handleTourComplete = () => {

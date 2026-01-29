@@ -51,37 +51,37 @@ const MeasurementForm: React.FC<MeasurementFormProps> = ({
 
   if (isPredicting) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 space-y-6">
-        <div className="w-16 h-16 border-4 border-stone-100 border-t-stone-900 rounded-full animate-spin"></div>
-        <div className="text-center">
-          <h3 className="text-2xl font-serif font-semibold">AI Analyzing Silhouette</h3>
-          <p className="text-stone-500">Extracting precision coordinates from captures...</p>
+      <div className="flex flex-col items-center justify-center py-32 space-y-8 animate-luxury-fade">
+        <div className="w-20 h-20 border-4 border-[var(--color-primary)]/10 border-t-[var(--color-secondary)] rounded-full animate-spin"></div>
+        <div className="text-center space-y-3">
+          <h3 className="text-3xl font-serif font-bold text-[var(--color-primary)]">Imperial Vision Active</h3>
+          <p className="text-[var(--color-text-secondary)] font-serif italic text-lg">"Synthesizing precision coordinates from anatomic captures..."</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-12">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-stone-100 pb-8">
-        <div className="space-y-2">
-          <h2 className="text-4xl font-serif font-bold">Client Profile</h2>
-          <p className="text-stone-500 italic">"The foundation of every masterpiece is precision."</p>
+    <div className="max-w-5xl mx-auto space-y-12 animate-luxury-fade">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-[var(--color-primary)]/5 pb-10">
+        <div className="space-y-3">
+          <h2 className="text-5xl font-serif font-bold text-[var(--color-primary)] tracking-tight">Client Specifications</h2>
+          <p className="text-[var(--color-text-secondary)] font-serif italic text-lg">"Precision is the silent foundation of digital couture."</p>
         </div>
 
-        <div className="flex bg-stone-100 p-1.5 rounded-xl border border-stone-200">
+        <div className="flex bg-[var(--color-primary)]/[0.03] p-1.5 rounded-2xl border border-[var(--color-primary)]/5">
           <button
             onClick={() => setUnit('cm')}
-            className={`px-6 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all ${
-              unit === 'cm' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-400 hover:text-stone-600'
+            className={`px-6 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${
+              unit === 'cm' ? 'bg-white text-[var(--color-primary)] shadow-xl' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]'
             }`}
           >
             Metric (cm)
           </button>
           <button
             onClick={() => setUnit('in')}
-            className={`px-6 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all ${
-              unit === 'in' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-400 hover:text-stone-600'
+            className={`px-6 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${
+              unit === 'in' ? 'bg-white text-[var(--color-primary)] shadow-xl' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]'
             }`}
           >
             Imperial (in)
@@ -91,21 +91,21 @@ const MeasurementForm: React.FC<MeasurementFormProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         {/* Measurements Grid */}
-        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 bg-white p-10 rounded-3xl shadow-sm border border-stone-100">
+        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8 bg-[var(--color-surface)] p-10 rounded-[3rem] shadow-2xl border border-[var(--color-primary)]/5">
           {fields.map((field) => {
             const displayValue = unit === 'in' ? cmToIn(measurements[field.key]) : measurements[field.key];
             return (
-              <div key={field.key} className="space-y-2">
-                <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">{field.label}</label>
+              <div key={field.key} className="space-y-2.5">
+                <label className="text-[10px] font-black text-[var(--color-text-secondary)] uppercase tracking-[0.2em] ml-2">{field.label}</label>
                 <div className="relative group">
                   <input
                     type="text"
                     value={displayValue}
                     onChange={(e) => handleChange(field.key, e.target.value)}
-                    className="w-full px-5 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-stone-900 focus:bg-white outline-none transition-all font-serif text-lg"
+                    className="w-full px-6 py-5 bg-[var(--color-background)] border border-[var(--color-primary)]/5 rounded-2xl focus:ring-2 focus:ring-[var(--color-secondary)] focus:bg-white outline-none transition-all font-serif text-xl font-bold text-[var(--color-primary)] shadow-inner"
                     placeholder={`0.0`}
                   />
-                  <span className="absolute right-5 top-1/2 -translate-y-1/2 text-stone-300 text-xs font-bold uppercase tracking-widest">
+                  <span className="absolute right-6 top-1/2 -translate-y-1/2 text-[var(--color-secondary)] text-[10px] font-black uppercase tracking-widest opacity-40">
                     {unit}
                   </span>
                 </div>
@@ -115,32 +115,32 @@ const MeasurementForm: React.FC<MeasurementFormProps> = ({
         </div>
 
         {/* Suggestion Sidebar */}
-        <div className="space-y-8 bg-stone-900 text-stone-50 p-10 rounded-3xl shadow-2xl">
-          <div className="space-y-4">
-            <h3 className="text-xl font-serif font-bold text-white">Creative Direction</h3>
-            <p className="text-stone-400 text-xs leading-relaxed">
-              Have a specific vision? Suggest a design language, fabric, or style for the AI to interpret.
+        <div className="space-y-10 bg-[var(--color-primary)] text-white p-10 rounded-[3rem] shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-bl-full -mr-16 -mt-16" />
+
+          <div className="space-y-4 relative z-10">
+            <h3 className="text-2xl font-serif font-bold">Creative Directive</h3>
+            <p className="text-white/40 text-sm leading-relaxed italic font-serif">
+              "Establish the aesthetic parameters for the Imperial Synthesis engine."
             </p>
           </div>
 
-          <div className="space-y-3">
-             <label className="text-[10px] font-bold text-stone-500 uppercase tracking-[0.2em]">Inspiration Notes</label>
+          <div className="space-y-4 relative z-10">
+             <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Inspiration Brief</label>
              <textarea 
                value={userSuggestion}
                onChange={(e) => onSuggestionChange(e.target.value)}
-               className="w-full h-48 bg-stone-800/50 border border-stone-700 rounded-2xl p-5 text-sm text-stone-100 outline-none focus:border-stone-500 transition-all resize-none placeholder:text-stone-600"
-               placeholder="Example: I want a collection inspired by mid-century French tailoring with modern oversized silhouettes..."
+               className="w-full h-56 bg-white/5 border border-white/10 rounded-2xl p-6 text-sm text-white outline-none focus:border-[var(--color-secondary)] transition-all resize-none font-serif italic"
+               placeholder="E.g. A collection of structured wool overcoats with exaggerated architectural lapels..."
              />
           </div>
 
           <button 
             onClick={onContinue}
-            className="w-full py-5 bg-white text-stone-900 rounded-2xl font-bold uppercase tracking-[0.2em] text-xs hover:bg-stone-100 transition-all flex items-center justify-center gap-3 shadow-lg"
+            className="w-full py-6 bg-white text-[var(--color-primary)] rounded-2xl font-black uppercase tracking-[0.3em] text-[11px] hover:bg-[var(--color-secondary)] transition-all flex items-center justify-center gap-4 shadow-2xl relative z-10 group"
           >
-            Curate 30 Designs
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
+            Curate 30 Concepts
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-2 text-[var(--color-secondary)]" />
           </button>
         </div>
       </div>
