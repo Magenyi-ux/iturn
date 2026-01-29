@@ -1,6 +1,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { AppState, INITIAL_MEASUREMENTS, INITIAL_CHARACTERISTICS, Client, Fabric, Order, StyleConcept, SavedInspiration, InventoryItem, PriceItem } from './types';
+import { supabase } from './services/supabase';
+import { useTheme } from './components/ThemeProvider';
+import {
+  Users, Sparkles, Video, SwatchBook, Briefcase, Database,
+  Bookmark, Camera, LogOut, Palette, Settings, Menu, X,
+  Crown, ChevronRight, Home
+} from 'lucide-react';
+import AuthPage from './components/AuthPage';
+import OnboardingTour from './components/OnboardingTour';
+import AIConcierge from './components/AIConcierge';
 import PhotoUpload from './components/PhotoUpload';
 import MeasurementForm from './components/MeasurementForm';
 import StyleCatalog from './components/StyleCatalog';
@@ -31,6 +41,11 @@ const INITIAL_INVENTORY: InventoryItem[] = [
 ];
 
 const App: React.FC = () => {
+  const { theme, setTheme } = useTheme();
+  const [user, setUser] = useState<any>(null);
+  const [guestMode, setGuestMode] = useState(() => localStorage.getItem('atelier_guest_mode') === 'true');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showTour, setShowTour] = useState(() => localStorage.getItem('atelier_tour_completed') !== 'true');
   const [state, setState] = useState<AppState>(() => {
     const saved = localStorage.getItem('atelier_state_v2');
     if (saved) {
@@ -71,6 +86,18 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('atelier_state_v2', JSON.stringify(state));
   }, [state]);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) setGuestMode(false);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('atelier_guest_mode', guestMode.toString());
+  }, [guestMode]);
 
   useEffect(() => {
     const checkKey = async () => {
@@ -194,8 +221,37 @@ const App: React.FC = () => {
     }));
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setGuestMode(false);
+    setUser(null);
+  };
+
+  if (!user && !guestMode) {
+    return <AuthPage onGuestMode={() => setGuestMode(true)} />;
+  }
+
+  const navItems = [
+    { id: 'vault', label: 'Vault', icon: Users },
+    { id: 'inspiration', label: 'Inspire', icon: Sparkles },
+    { id: 'live_workshop', label: 'Live', icon: Video },
+    { id: 'materials', label: 'Fabrics', icon: SwatchBook },
+    { id: 'workroom', label: 'Orders', icon: Briefcase },
+    { id: 'admin', label: 'Data', icon: Database },
+    { id: 'archive', label: 'Saved', icon: Bookmark },
+    { id: 'fitting_choice', label: 'Fitting', icon: Camera }
+  ];
+
+  const handleTourComplete = () => {
+    setShowTour(false);
+    localStorage.setItem('atelier_tour_completed', 'true');
+  };
+
   return (
-    <div className="min-h-screen flex bg-stone-50">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-[var(--color-background)] text-[var(--color-text)] transition-colors duration-500">
+      {showTour && <OnboardingTour onComplete={handleTourComplete} />}
+      <AIConcierge />
+
       {showKeyPrompt && (
         <div className="fixed inset-0 z-[100] bg-stone-900/90 backdrop-blur-xl flex items-center justify-center p-8">
            <div className="bg-white max-w-lg w-full rounded-[3rem] p-12 text-center space-y-8 shadow-2xl animate-in zoom-in-95">
@@ -228,45 +284,93 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <aside className="w-20 lg:w-64 bg-stone-900 text-stone-50 flex flex-col h-screen sticky top-0 z-[50]">
-        <div className="p-8 flex items-center gap-4">
-          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
-            <span className="text-stone-900 font-serif font-bold text-xl">A</span>
+      {/* Mobile Header */}
+      <header className="lg:hidden h-20 bg-[var(--color-primary)] flex items-center justify-between px-6 sticky top-0 z-[60] shadow-xl">
+        <div className="flex items-center gap-3">
+          <Crown className="w-8 h-8 text-[var(--color-secondary)]" />
+          <h1 className="text-xl font-serif font-bold text-white">Atelier AI</h1>
+        </div>
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="p-2 text-white/80 hover:text-white transition-colors"
+        >
+          {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+      </header>
+
+      {/* Sidebar - Responsive */}
+      <aside className={`
+        fixed inset-y-0 left-0 z-[70] w-72 bg-[var(--color-primary)] text-white transform transition-transform duration-500 ease-in-out lg:relative lg:translate-x-0
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        <div className="flex flex-col h-full border-r border-white/5">
+          <div className="p-10 hidden lg:block">
+            <div className="flex items-center gap-4 mb-2">
+              <Crown className="w-8 h-8 text-[var(--color-secondary)]" />
+              <h1 className="text-2xl font-serif font-bold">Atelier AI</h1>
+            </div>
+            <p className="text-[9px] uppercase tracking-[0.4em] text-white/40 font-black">Digital Tailoring Suite</p>
           </div>
-          <div className="hidden lg:block">
-            <h1 className="text-lg font-serif font-bold">Atelier AI</h1>
-            <p className="text-[10px] uppercase tracking-widest text-stone-500 font-bold">Digital Tailoring</p>
+
+          <nav className="flex-1 px-6 space-y-1.5 overflow-y-auto scrollbar-hide">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setState(prev => ({ ...prev, view: item.id as any }));
+                    setIsSidebarOpen(false);
+                  }}
+                  data-tour={item.id}
+                  className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all group ${
+                    state.view === item.id
+                    ? 'bg-[var(--color-secondary)] text-[var(--color-primary)] shadow-2xl scale-[1.02]'
+                    : 'text-white/40 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Icon className={`w-5 h-5 transition-transform group-hover:scale-110 ${state.view === item.id ? 'text-[var(--color-primary)]' : 'text-white/20'}`} />
+                  <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
+                  {state.view === item.id && <ChevronRight className="w-4 h-4 ml-auto" />}
+                </button>
+              );
+            })}
+          </nav>
+
+          <div className="p-8 border-t border-white/5 space-y-6">
+            <div className="space-y-4" data-tour="themes">
+              <p className="text-[9px] uppercase tracking-[0.3em] text-white/20 font-black flex items-center gap-2">
+                <Palette className="w-3 h-3" /> Royal Palettes
+              </p>
+              <div className="flex gap-3">
+                {(['navy', 'emerald', 'crimson'] as const).map(t => (
+                  <button
+                    key={t}
+                    onClick={() => setTheme(t)}
+                    className={`w-8 h-8 rounded-full border-2 transition-all ${
+                      theme === t ? 'border-[var(--color-secondary)] scale-110' : 'border-transparent hover:scale-105'
+                    }`}
+                    style={{
+                      backgroundColor: t === 'navy' ? '#0A1128' : t === 'emerald' ? '#064E3B' : '#7F1D1D'
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all text-red-400/60 hover:text-red-400 hover:bg-red-400/5 group"
+            >
+              <LogOut className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
+              <span className="text-[10px] font-black uppercase tracking-widest">Exit Archive</span>
+            </button>
           </div>
         </div>
-
-        <nav className="flex-1 px-4 py-8 space-y-2">
-          {[
-            { id: 'vault', label: 'Client Vault', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
-            { id: 'inspiration', label: 'Inspiration', icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' },
-            { id: 'live_workshop', label: 'Live Workshop', icon: 'M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2-2v8a2 2 0 002 2z' },
-            { id: 'materials', label: 'Materials Library', icon: 'M3 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7c-2 0-3 1-3 3zm0 4h16' },
-            { id: 'workroom', label: 'Workroom', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' },
-            { id: 'admin', label: 'Database', icon: 'M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7c-2 0-3 1-3 3zm0 4h16M4 15h16' },
-            { id: 'archive', label: 'Saved Studio', icon: 'M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z' },
-            { id: 'fitting_choice', label: 'New Fitting', icon: 'M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z' }
-          ].map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setState(prev => ({ ...prev, view: item.id as any }))}
-              className={`w-full flex items-center gap-4 px-4 py-3 rounded-2xl transition-all ${
-                state.view === item.id ? 'bg-white text-stone-900 shadow-xl' : 'text-stone-400 hover:text-white'
-              }`}
-            >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
-              </svg>
-              <span className="hidden lg:block text-xs font-bold uppercase tracking-widest">{item.label}</span>
-            </button>
-          ))}
-        </nav>
       </aside>
 
-      <main className="flex-1 p-12 overflow-y-auto">
+      {/* Main Content */}
+      <main className="flex-1 min-h-screen overflow-y-auto lg:p-12 p-6 relative animate-luxury-fade">
         {state.view === 'vault' && (
           state.selectedClientId ? (
             <StyleTimeline 
@@ -427,6 +531,32 @@ const App: React.FC = () => {
           />
         )}
       </main>
+
+      {/* Mobile Navigation Dock */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-20 bg-[var(--color-primary)] border-t border-white/10 flex items-center justify-around px-4 z-[60] backdrop-blur-xl shadow-[0_-20px_50px_rgba(0,0,0,0.3)]">
+        {navItems.slice(0, 5).map((item) => {
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.id}
+              onClick={() => setState(prev => ({ ...prev, view: item.id as any }))}
+              className={`flex flex-col items-center gap-1.5 transition-all ${
+                state.view === item.id ? 'text-[var(--color-secondary)]' : 'text-white/30'
+              }`}
+            >
+              <Icon className="w-5 h-5" />
+              <span className="text-[8px] font-black uppercase tracking-tighter">{item.label}</span>
+            </button>
+          );
+        })}
+        <button
+          onClick={() => setIsSidebarOpen(true)}
+          className="flex flex-col items-center gap-1.5 text-white/30"
+        >
+          <Menu className="w-5 h-5" />
+          <span className="text-[8px] font-black uppercase tracking-tighter">More</span>
+        </button>
+      </nav>
     </div>
   );
 };
