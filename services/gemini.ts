@@ -3,6 +3,19 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { Measurements, StyleConcept, PhysicalCharacteristics, ViewAngle, DisplayMode, Fabric } from "../types";
 
 /**
+ * Sanitizes user input for use in AI prompts to prevent instruction injection.
+ * Escapes quotes, removes control keywords, and limits length.
+ */
+export const sanitizePromptInput = (input: string): string => {
+  if (!input) return "";
+  return input
+    .replace(/"/g, '\\"')
+    .replace(/SYSTEM:|USER INSTRUCTIONS:|IGNORE PREVIOUS|ADMIN:|ROOT:/gi, "")
+    .trim()
+    .slice(0, 500);
+};
+
+/**
  * Custom error class to provide descriptive feedback to the atelier interface.
  * Helps distinguish between network issues, AI safety blocks, and quota limits.
  */
@@ -91,7 +104,7 @@ export const generateDesignDNA = async (frontViewImage: string, style: StyleConc
           4. HARDWARE LOG: Detailed count, shape, and material of buttons, zippers, and rivets.
           5. SEAM ARCHITECTURE: Placement of darts, top-stitching, and panel joins.
 
-USER INSTRUCTIONS: Extract Design DNA for "${style.title}".` }
+USER INSTRUCTIONS: Extract Design DNA for "${sanitizePromptInput(style.title)}".` }
         ]
       }
     });
@@ -111,7 +124,7 @@ export const searchInspiration = async (query: string): Promise<{ text: string, 
       model: 'gemini-1.5-flash',
       contents: `SYSTEM: Search for high-end fashion design related to the user query. Provide a deep aesthetic synthesis.
 
-USER INSTRUCTIONS: Query: "${query}"`,
+USER INSTRUCTIONS: Query: "${sanitizePromptInput(query)}"`,
       config: {
         tools: [{ googleSearch: {} }]
       }
@@ -133,7 +146,7 @@ export const generateMoodImages = async (description: string): Promise<string[]>
         model: 'gemini-1.5-flash',
         contents: `SYSTEM: A high-fashion mood board image. Studio lighting, hyper-realistic.
 
-USER INSTRUCTIONS: Theme: "${description}". Aspect ratio: ${aspect}.`,
+USER INSTRUCTIONS: Theme: "${sanitizePromptInput(description)}". Aspect ratio: ${aspect}.`,
         config: { imageConfig: { aspectRatio: aspect } }
       });
       const part = response.candidates?.[0]?.content?.parts.find(p => p.inlineData);
@@ -156,7 +169,7 @@ export const refineDesign = async (baseImage: string, sketchOverlay: string, ins
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(sketch) } },
           { text: `SYSTEM: Refine the garment shown in the images. Output editorial photography.
 
-USER INSTRUCTIONS: ${instructions}` }
+USER INSTRUCTIONS: "${sanitizePromptInput(instructions)}"` }
         ]
       },
       config: { imageConfig: { aspectRatio: "3:4" } }
@@ -183,7 +196,7 @@ export const generatePattern = async (style: StyleConcept, measurements: Measure
       model: 'gemini-1.5-flash',
       contents: `SYSTEM: Create a professional technical pattern description based on provided style and measurements.
 
-USER INSTRUCTIONS: Style: "${style.title}". Measurements: ${JSON.stringify(measurements)}.`
+USER INSTRUCTIONS: Style: "${sanitizePromptInput(style.title)}". Measurements: ${JSON.stringify(measurements)}.`
     });
     return response.text || "Pattern generation error.";
   });
@@ -270,7 +283,7 @@ export const generateStyles = async (measurements: Measurements, photos: Record<
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(img) } },
           { text: `SYSTEM: Create 30 visionary couture concepts. Proportions: ${JSON.stringify(measurements)}.
 
-USER INSTRUCTIONS: Suggestion: "${suggestion}". Generate concepts based on the provided photo and proportions.` }
+USER INSTRUCTIONS: Suggestion: "${sanitizePromptInput(suggestion)}". Generate concepts based on the provided photo and proportions.` }
         ]
       },
       config: {
@@ -319,7 +332,7 @@ export const generateStyleImage = async (
 
     const prompt = `SYSTEM: Hyper-realistic 8k fashion photography. Mode: ${mode}. Studio lighting. ${architecturalDirective}
 
-USER INSTRUCTIONS: View: ${angle}. Style: "${style.title}".`;
+USER INSTRUCTIONS: View: ${angle}. Style: "${sanitizePromptInput(style.title)}".`;
     parts.push({ text: prompt });
 
     const response = await ai.models.generateContent({
