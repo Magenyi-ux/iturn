@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Fabric } from '../types';
 import { analyzeFabric } from '../services/gemini';
-import { Upload, X, ShieldCheck, Microscope, Layers, ChevronRight } from 'lucide-react';
+import { Upload, X, ShieldCheck, Microscope, Layers, ChevronRight, SwatchBook } from 'lucide-react';
 
 interface MaterialsLibraryProps {
   fabrics: Fabric[];
