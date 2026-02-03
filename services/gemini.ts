@@ -13,6 +13,21 @@ export class CoutureError extends Error {
   }
 }
 
+/**
+ * Sanitizes user input to prevent prompt injection.
+ * Escapes quotes, backslashes, and removes newlines. Truncates to 500 characters.
+ */
+export const sanitizePromptInput = (input: string): string => {
+  if (!input) return "";
+  return input
+    .slice(0, 500)
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, " ")
+    .replace(/\r/g, " ")
+    .replace(/\t/g, " ");
+};
+
 async function withRetry<T>(fn: () => Promise<T>, maxRetries: number = 3, initialDelay: number = 3000): Promise<T> {
   let lastError: any;
   for (let i = 0; i < maxRetries; i++) {
@@ -74,7 +89,7 @@ const extractBase64 = (url: string) => url.split(',')[1];
  */
 export const generateDesignDNA = async (frontViewImage: string, style: StyleConcept): Promise<string> => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI();
+    const ai = new GoogleGenAI(import.meta.env.VITE_GEMINI_API_KEY || "");
     const img = await standardizeImage(frontViewImage, 768);
     const response = await ai.models.generateContent({
       model: 'gemini-1.5-pro',
@@ -91,7 +106,7 @@ export const generateDesignDNA = async (frontViewImage: string, style: StyleConc
           4. HARDWARE LOG: Detailed count, shape, and material of buttons, zippers, and rivets.
           5. SEAM ARCHITECTURE: Placement of darts, top-stitching, and panel joins.
 
-USER INSTRUCTIONS: Extract Design DNA for "${style.title}".` }
+USER INSTRUCTIONS: Extract Design DNA for "${sanitizePromptInput(style.title)}".` }
         ]
       }
     });
@@ -106,12 +121,12 @@ USER INSTRUCTIONS: Extract Design DNA for "${style.title}".` }
 
 export const searchInspiration = async (query: string): Promise<{ text: string, links: { title: string, uri: string }[] }> => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI();
+    const ai = new GoogleGenAI(import.meta.env.VITE_GEMINI_API_KEY || "");
     const response = await ai.models.generateContent({
       model: 'gemini-1.5-flash',
       contents: `SYSTEM: Search for high-end fashion design related to the user query. Provide a deep aesthetic synthesis.
 
-USER INSTRUCTIONS: Query: "${query}"`,
+USER INSTRUCTIONS: Query: "${sanitizePromptInput(query)}"`,
       config: {
         tools: [{ googleSearch: {} }]
       }
@@ -125,7 +140,7 @@ USER INSTRUCTIONS: Query: "${query}"`,
 
 export const generateMoodImages = async (description: string): Promise<string[]> => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI();
+    const ai = new GoogleGenAI(import.meta.env.VITE_GEMINI_API_KEY || "");
     const aspects: ("1:1" | "3:4" | "4:3")[] = ["3:4", "1:1", "4:3", "3:4"];
     const results: string[] = [];
     for (const aspect of aspects) {
@@ -133,7 +148,7 @@ export const generateMoodImages = async (description: string): Promise<string[]>
         model: 'gemini-1.5-flash',
         contents: `SYSTEM: A high-fashion mood board image. Studio lighting, hyper-realistic.
 
-USER INSTRUCTIONS: Theme: "${description}". Aspect ratio: ${aspect}.`,
+USER INSTRUCTIONS: Theme: "${sanitizePromptInput(description)}". Aspect ratio: ${aspect}.`,
         config: { imageConfig: { aspectRatio: aspect } }
       });
       const part = response.candidates?.[0]?.content?.parts.find(p => p.inlineData);
@@ -145,7 +160,7 @@ USER INSTRUCTIONS: Theme: "${description}". Aspect ratio: ${aspect}.`,
 
 export const refineDesign = async (baseImage: string, sketchOverlay: string, instructions: string): Promise<string | null> => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI();
+    const ai = new GoogleGenAI(import.meta.env.VITE_GEMINI_API_KEY || "");
     const base = await standardizeImage(baseImage, 512);
     const sketch = await standardizeImage(sketchOverlay, 512);
     const response = await ai.models.generateContent({
@@ -156,7 +171,7 @@ export const refineDesign = async (baseImage: string, sketchOverlay: string, ins
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(sketch) } },
           { text: `SYSTEM: Refine the garment shown in the images. Output editorial photography.
 
-USER INSTRUCTIONS: ${instructions}` }
+USER INSTRUCTIONS: "${sanitizePromptInput(instructions)}"` }
         ]
       },
       config: { imageConfig: { aspectRatio: "3:4" } }
@@ -178,12 +193,12 @@ USER INSTRUCTIONS: ${instructions}` }
 
 export const generatePattern = async (style: StyleConcept, measurements: Measurements): Promise<string> => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI();
+    const ai = new GoogleGenAI(import.meta.env.VITE_GEMINI_API_KEY || "");
     const response = await ai.models.generateContent({
       model: 'gemini-1.5-flash',
       contents: `SYSTEM: Create a professional technical pattern description based on provided style and measurements.
 
-USER INSTRUCTIONS: Style: "${style.title}". Measurements: ${JSON.stringify(measurements)}.`
+USER INSTRUCTIONS: Style: "${sanitizePromptInput(style.title)}". Measurements: ${JSON.stringify(measurements)}.`
     });
     return response.text || "Pattern generation error.";
   });
@@ -191,7 +206,7 @@ USER INSTRUCTIONS: Style: "${style.title}". Measurements: ${JSON.stringify(measu
 
 export const analyzeFabric = async (imageUrl: string): Promise<string> => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI();
+    const ai = new GoogleGenAI(import.meta.env.VITE_GEMINI_API_KEY || "");
     const img = await standardizeImage(imageUrl, 512);
     const response = await ai.models.generateContent({
       model: 'gemini-1.5-flash',
@@ -208,7 +223,7 @@ export const analyzeFabric = async (imageUrl: string): Promise<string> => {
 
 export const predictMeasurements = async (photos: Record<string, string>) => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI();
+    const ai = new GoogleGenAI(import.meta.env.VITE_GEMINI_API_KEY || "");
     const p = {
       front: await standardizeImage(photos.front),
       side: await standardizeImage(photos.side),
@@ -261,7 +276,7 @@ USER INSTRUCTIONS: Extract measurements from the attached front, side, and back 
 
 export const generateStyles = async (measurements: Measurements, photos: Record<string, string>, suggestion: string = "") => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI();
+    const ai = new GoogleGenAI(import.meta.env.VITE_GEMINI_API_KEY || "");
     const img = await standardizeImage(photos.front, 512);
     const response = await ai.models.generateContent({
       model: 'gemini-1.5-pro',
@@ -270,7 +285,7 @@ export const generateStyles = async (measurements: Measurements, photos: Record<
           { inlineData: { mimeType: 'image/jpeg', data: extractBase64(img) } },
           { text: `SYSTEM: Create 30 visionary couture concepts. Proportions: ${JSON.stringify(measurements)}.
 
-USER INSTRUCTIONS: Suggestion: "${suggestion}". Generate concepts based on the provided photo and proportions.` }
+USER INSTRUCTIONS: Suggestion: "${sanitizePromptInput(suggestion)}". Generate concepts based on the provided photo and proportions.` }
         ]
       },
       config: {
@@ -303,7 +318,7 @@ export const generateStyleImage = async (
   designDNA?: string
 ) => {
   return withRetry(async () => {
-    const ai = new GoogleGenAI();
+    const ai = new GoogleGenAI(import.meta.env.VITE_GEMINI_API_KEY || "");
     const personRef = await standardizeImage(userPhotoRef, 768);
     
     const parts: any[] = [
@@ -319,7 +334,7 @@ export const generateStyleImage = async (
 
     const prompt = `SYSTEM: Hyper-realistic 8k fashion photography. Mode: ${mode}. Studio lighting. ${architecturalDirective}
 
-USER INSTRUCTIONS: View: ${angle}. Style: "${style.title}".`;
+USER INSTRUCTIONS: View: ${angle}. Style: "${sanitizePromptInput(style.title)}".`;
     parts.push({ text: prompt });
 
     const response = await ai.models.generateContent({
