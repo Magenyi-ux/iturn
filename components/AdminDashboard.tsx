@@ -72,7 +72,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ inventory, onUpdateInve
     if (newItem.name && newItem.category) {
       onUpdateInventory({
         ...newItem,
-        id: Math.random().toString(36).substr(2, 9),
+        id: crypto.randomUUID(),
       } as InventoryItem);
       setIsAdding(false);
       setNewItem({ category: 'Material', name: '', unitCost: 0, stock: 0, imageUrl: '' });
