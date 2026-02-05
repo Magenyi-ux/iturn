@@ -51,7 +51,7 @@ const InspirationHub: React.FC<InspirationHubProps> = ({ onGenerate, onSaveInspi
     if (!onSaveInspiration) return;
     
     const inspiration: SavedInspiration = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: crypto.randomUUID(),
       type,
       content,
       title: type === 'text' ? `Synthesis: ${query}` : `Mood Image for ${query}`,
