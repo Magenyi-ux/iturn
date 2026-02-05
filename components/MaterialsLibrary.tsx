@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Fabric } from '../types';
 import { analyzeFabric } from '../services/gemini';
-import { Upload, X, ShieldCheck, Microscope, Layers, ChevronRight } from 'lucide-react';
+import { Upload, X, ShieldCheck, Microscope, Layers, ChevronRight, SwatchBook } from 'lucide-react';
 
 interface MaterialsLibraryProps {
   fabrics: Fabric[];
@@ -40,7 +40,7 @@ const MaterialsLibrary: React.FC<MaterialsLibraryProps> = ({ fabrics, onAdd }) =
         try {
           const analysis = await analyzeFabric(url);
           onAdd({
-            id: Math.random().toString(36).substr(2, 9),
+            id: crypto.randomUUID(),
             name: "Digital Swatch " + new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
             type: "Direct Import",
             weight: "Calculated",

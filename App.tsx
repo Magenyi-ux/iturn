@@ -169,7 +169,7 @@ const App: React.FC = () => {
     if (!pricingContext) return;
     const style = pricingContext;
     const newOrder: Order = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: crypto.randomUUID(),
       clientId: state.selectedClientId || state.clients[0].id,
       styleId: style.id,
       fabricId: state.fabrics[0]?.id || 'default',
