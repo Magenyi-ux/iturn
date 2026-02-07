@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI, LiveServerMessage, Modality, Blob } from '@google/genai';
 import { StyleConcept, Order } from '../types';
 import { Mic, MicOff, PhoneOff, Video as VideoIcon, Zap, ShieldCheck, Activity, ChevronRight, Crown } from 'lucide-react';
+import { sanitizePromptInput } from '../services/gemini';
 
 interface LiveWorkshopProps {
   concepts: StyleConcept[];
@@ -104,7 +105,7 @@ const LiveWorkshop: React.FC<LiveWorkshopProps> = ({ concepts, orders }) => {
     setIsConnecting(true);
 
     try {
-      const ai = new GoogleGenAI();
+      const ai = new GoogleGenAI(import.meta.env.VITE_GEMINI_API_KEY || "");
       
       inputAudioCtx.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
       outputAudioCtx.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
@@ -124,8 +125,8 @@ const LiveWorkshop: React.FC<LiveWorkshopProps> = ({ concepts, orders }) => {
             voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Puck' } },
           },
           systemInstruction: `SYSTEM: You are the "Master Tutor" on a live video call with a tailor.
-          Active Style: "${activeStyle.title}".
-          Technical Construction Steps: ${activeStyle.steps.join('; ')}.
+          Active Style: "${sanitizePromptInput(activeStyle.title)}".
+          Technical Construction Steps: ${activeStyle.steps.map(s => sanitizePromptInput(s)).join('; ')}.
           
           MISSION:
           - Provide hands-free guidance for the current construction phase.
